@@ -10,35 +10,26 @@
     <body>
         <h1 style="font-size:5em;display: block;text-align:center;margin-bottom:3px">Pong</h1>
         <h2 style="display: block;text-align:center;">The Online Mutiplayer Game</h2>
+        <a href="about.html" style="display: block;text-align:center;cursor:pointer;text-decoration: none;color:white" >How to play?</a>
+        <br><br>
 
 <div id="lobby" style="display: none">
-
-        
-
-        <h1>Lobby</h1>
-
-        <h2 id ="gameid" >Game ID : </h2>
-        <h2 id="player_wait_banner" style="display: none" >Waiting for players (Session will be terminated in 100 seconds) ...</h2>
-        <div id = "player_table" >
-     
+        <h1 style="margin:auto;text-align:center;font-size:5em">Lobby</h1>
+        <br><br>
+        <h2 id ="gameid" style="margin:auto;text-align:center;font-size: 3em" >Game ID : </h2>
+        <div id="loader" class="loader"></div>
+        <br>
+        <h2 id="player_wait_banner" style="display: none;margin:auto;text-align: center" ></h2>
+        <br><br>
+        <div id = "player_table">
         </div>
- 
-            <br><br>
 
-
-
-
+<br><br>
 </div>
 
 <div id="game" style="display: block">
-
-
-        <svg id="canvas" width="600" height="600"/>
-
-
-
-
-        <h1 id="game_state_banner" style="text-align:center" > </h1>
+        <svg id="canvas" width="600" height="600"></svg>
+        <h1 id="game_state_banner" style="text-align:center"> </h1>
         <h3 id="player_turn" style="text-align:center"></h3>
         
         <button class="startbutton" type="button" id="start">Start</button>
@@ -46,9 +37,7 @@
 </div>
        
 <div id="options" style="display: block">
-        
-                <h1 onclick="myFunction()" style="text-align:center">Options &nbsp<i id="arrow" class="down"></i></h2>
-                        
+                <h1 onclick="myFunction()" style="text-align:center;cursor:pointer;">Options &nbsp<i id="arrow" class="down"></i></h2>     
             <div id="settings" style="display: none">
             <table>      
                 <tr>
