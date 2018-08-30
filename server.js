@@ -28,7 +28,8 @@ let gameData = {}
 io.on('connection', function(socket) {
 
   // Stop checking for players
-  socket.on('stop_searching_for_players', function() {
+  socket.on('stop_searching_for_players', function(res) {
+    gameData[res] = undefined
     stop_checking_for_player()
   });
 
@@ -37,7 +38,7 @@ io.on('connection', function(socket) {
     
 
     // looping until we get a gameplay id to play in
-    max_number_of_players = 4
+    max_number_of_players = 20
     gameid = Math.floor(Math.random() * max_number_of_players)
     count = 0
 
@@ -52,7 +53,6 @@ io.on('connection', function(socket) {
 
     // if the game_play id is found then initialize the location and start the session
     if (gameData[gameid] == undefined){
-      console.log("helo")
       let players = {};
       gameData[gameid] = players
       gameData[gameid][socket.id] = 0
@@ -66,8 +66,13 @@ io.on('connection', function(socket) {
       io.sockets.emit('game_id', res);
   
       search_stream = setInterval(function() {
-        io.sockets.emit('player_update', gameData[gameid]);
-      }, 500)
+        let res = {
+            game:gameid,
+            socket:socket.id, 
+            game_data:gameData[gameid]
+        }
+        io.sockets.emit('player_update', res);
+      }, 1000)
       stop_checking_for_player = () => clearInterval(search_stream)
     }
     
@@ -78,7 +83,6 @@ io.on('connection', function(socket) {
   socket.on('join_game', function(gameid) {
 
     if (gameData[gameid] != undefined){
-      console.log(Object.keys(gameData[gameid]).length)
       if (Object.keys(gameData[gameid]).length > 1){
         let res = {
           "code":404,
@@ -116,7 +120,6 @@ io.on('connection', function(socket) {
 
   socket.on('movement', function(data) {
     if (data != undefined){
-      console.log(data)
       if (gameData[data.gameid] != undefined){
         gameData[data.gameid][data.socket] = data.y
         io.sockets.emit('player_movement', gameData);
@@ -125,12 +128,28 @@ io.on('connection', function(socket) {
     }
     
   }),
-  socket.on('ball', function(ball) {
-      io.sockets.emit('ball_move', {x:ball.x,y:ball.y});
+  socket.on('ball', function(data) {
+    if (data != undefined){
+      if (gameData[data.gameid] != undefined){
+        io.sockets.emit('ball_move', data);
+      }
+    }
+
+      
     
     
 
   });
+
+  socket.on('score_update', function(res) {
+    io.sockets.emit("update_score",res)
+      
+    })
+
+    socket.on('detach', function(res) {
+      delete gameData[res]
+      console.log(gameData)
+      })
 
   //   var players = {};
   //   game_id[gameid] = players
