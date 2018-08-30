@@ -1,0 +1,144 @@
+<html>
+    <head>
+        <style>
+            @import url(style.css);
+
+        </style>
+        <script src="/socket.io/socket.io.js"></script>
+
+    </head>
+    <body>
+        <h1 style="font-size:5em;display: block;text-align:center;margin-bottom:3px">Pong</h1>
+        <h2 style="display: block;text-align:center;">The Online Mutiplayer Game</h2>
+
+<div id="lobby" style="display: none">
+
+        
+
+        <h1>Lobby</h1>
+
+        <h2 id ="gameid" >Game ID : </h2>
+        <h2 id="player_wait_banner" style="display: none" >Waiting for players (Session will be terminated in 100 seconds) ...</h2>
+        <div id = "player_table" >
+     
+        </div>
+ 
+            <br><br>
+
+
+
+
+</div>
+
+<div id="game" style="display: block">
+
+
+        <svg id="canvas" width="600" height="600"/>
+
+
+
+
+        <h1 id="game_state_banner" style="text-align:center" > </h1>
+        <h3 id="player_turn" style="text-align:center"></h3>
+        
+        <button class="startbutton" type="button" id="start">Start</button>
+        <br><br>
+</div>
+       
+<div id="options" style="display: block">
+        
+                <h1 onclick="myFunction()" style="text-align:center">Options &nbsp<i id="arrow" class="down"></i></h2>
+                        
+            <div id="settings" style="display: none">
+            <table>      
+                <tr>
+                        <td><label for="ball_speed">Difficulty</label></td>
+                        <td> <input type="text" id="ball_speed"></td>
+                </tr>
+                <tr>
+                        <td><label for="player_side">Player Side</label></td>
+                        <td style="display:block"> <input type="radio" name="player_side" id="left_side" value="left" checked style="display:inline"> Left<br>
+                            <input type="radio" name="player_side" id="right_side" value="right" style="display:inline"> Right<br></td>
+                </tr>
+                <tr>
+                        <td><label for="paddle_height">Paddle Height</label></td>
+                        <td> <input type="text" id="paddle_height"></td>
+                        
+                </tr>
+
+                <tr>
+                        <td><label for="theight">Table Height</label></td>
+                        <td> <input type="text" id="theight"></td>
+                </tr>
+                <tr>
+                        <td><label for="twidth">Table Width</label></td>
+                        <td> <input type="text" id="twidth"></td>
+                </tr>
+                
+                <tr>
+                        <td><label for="frame_rate">Frame Rate</label></td>
+                        <td> <input type="text" id="frame_rate"></td>
+                </tr>
+                <tr>
+                        <td><label for="game_point">Game Point</label></td>
+                        <td> <input type="text" id="game_point"></td>
+                </tr>
+                
+                <tr>
+                        <td><label for="dash_gap">Center Line Dash Gap</label></td>
+                        <td> <input type="text" id="dash_gap"></td>
+                </tr>
+                <tr>
+                        <td><label for="padding">Padding Around the Play Area</label></td>
+                        <td> <input type="text" id="padding"></td>
+                </tr>
+            </table>
+
+            <br>
+            <button class="startbutton" type="button" id="update" >Update Game</button>
+        </div>
+    </div>
+
+<hr>
+    <div id="singleplayer" style="display: none">
+
+            <h1 style="text-align:center">
+                Single Player
+            </h1>
+            <button class="startbutton" id="singleplayer_button">Switch to Single Player</button>
+            </div>
+
+    <div id="multiplayer" style="display: block">
+
+    <h1 style="text-align:center">
+        Multiplayer
+    </h1>
+    <button class="startbutton" id="creategame">Create Game</button>
+    <br><br><br>
+    <input id="join_game_id" type="text" placeholder="Please enter Game ID.." style="color:white;border:1px solid white;;text-align:center;display:block;width:40%;margin:auto;">
+    <br><br>
+    <button class="startbutton" id="joingame">Join Game</button>
+
+    </div>
+   
+    </body>
+    <script>
+
+    function myFunction() {
+                var x = document.getElementById("settings");
+                var arrow = document.getElementById("arrow");
+                if (x.style.display === "none") {
+                    arrow.style.webkitTransform = "rotate(-135deg)"
+                    arrow.style.transform = "rotate(-135deg)"
+                    x.style.display = "block";
+                } else {
+                    x.style.display = "none";
+                    arrow.style.webkitTransform = "rotate(45deg)"
+                    arrow.style.transform = "rotate(45deg)"
+                }
+            }
+    </script>
+    <script src="svgelement.js"></script>
+    <script src="observable.js"></script>
+    <script src="pong.js"></script>
+</html>
