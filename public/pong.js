@@ -1,8 +1,7 @@
 "use strict";
 function pong() {
     class SessionData {
-        constructor() {
-        }
+        constructor() { }
     }
     SessionData.session_data = {
         current_paddle: undefined,
@@ -23,7 +22,7 @@ function pong() {
     Settings.settings = {
         "table_height": 600,
         "table_width": 600,
-        "game_speed": 0.5,
+        "game_speed": 1,
         "ball_speed": 2,
         "player_side": "left",
         "game_point": 11,
@@ -44,8 +43,9 @@ function pong() {
                 Settings.settings.player_side === "left" ?
                     (SessionData.session_data.current_paddle = this.createPaddle(Settings.settings.paddle_height, "left"),
                         SessionData.session_data.opponent_paddle = this.createPaddle(Settings.settings.paddle_height, "right"))
-                    : (SessionData.session_data.current_paddle = this.createPaddle(Settings.settings.paddle_height, "right"),
-                        SessionData.session_data.opponent_paddle = this.createPaddle(Settings.settings.paddle_height, "left"));
+                    :
+                        (SessionData.session_data.current_paddle = this.createPaddle(Settings.settings.paddle_height, "right"),
+                            SessionData.session_data.opponent_paddle = this.createPaddle(Settings.settings.paddle_height, "left"));
             };
             this.paddle_movement = (paddle) => (y_cord) => {
                 paddle.attr("y", y_cord);
@@ -165,13 +165,15 @@ function pong() {
                     .map(({ x, y }) => getBallDirection(x, y, SessionData.session_data.current_paddle))
                     .map(({ x, y }) => getBallDirection(x, y, SessionData.session_data.opponent_paddle))
                     .map(({ x, y }) => Number(y) > Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.ball.attr("r")) ?
-                    (GameSound.game_sound.collision.play(), y_change = (-y_change),
+                    (GameSound.game_sound.collision.play(),
+                        y_change = (-y_change),
                         { x: x, y: y })
                     :
                         (y_change = y_change,
                             { x: x, y: y }))
                     .map(({ x, y }) => Number(y) < Settings.settings.padding + Number(this.ball.attr("r")) ?
-                    (GameSound.game_sound.collision.play(), y_change = (-y_change),
+                    (GameSound.game_sound.collision.play(),
+                        y_change = (-y_change),
                         { x: x, y: y })
                     :
                         (y_change = y_change,
@@ -207,7 +209,6 @@ function pong() {
                 };
                 return Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ y: SessionData.session_data.current_ball.getBall().attr('cy') }))
-                    .filter((y) => !(Number(y) <= (Number(HTMLPage.svg.getAttribute("height"))) - (Number(this.paddle.attr("height")) / 2) - Settings.settings.padding) && !(Number(y) >= Settings.settings.padding))
                     .map(({ y }) => ({ y: increment(Number(y)) }))
                     .subscribe(({ y }) => (this.paddle.attr("y", y.toString())));
             };
