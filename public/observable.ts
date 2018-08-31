@@ -99,25 +99,15 @@ class SafeObserver<T> implements Observer<T> {
   }
 
 
-  static fromSocketIO<E extends Event>(el: Node,name: string): Observable<E> {
+  static fromSocketIO<E extends Event>(socket:any,el: Node,name: string): Observable<E> {
     return new Observable<E>((observer: Observer<E>) => {
-      let socket = io()
       const stream = socket.on(name,(res:any)=>observer.next(res))
       el.addEventListener(name, stream);
       return () => el.removeEventListener(name, stream);
     })
   }
   
-  // static fromServerSocketIO<E extends Event>(socket:any,el: Node,name: string): Observable<E> {
-  //   return new Observable<E>((observer: Observer<E>) => {
-  //     const stream = socket.on(name,(res)=>observer.next(res))
-  //     el.addEventListener(name, stream);
-  //     return () => el.removeEventListener(name, stream);
-  //   })
-  // }
-
-  static toSocketIO(name: string,request:Object) {
-    let socket = io()
+  static toSocketIO(socket:any,name: string,request?:any,) {
     socket.emit(name,request)
 }
 

@@ -24,6 +24,7 @@ server.listen(5000, function() {
 });
 
 let gameData = {}
+let serverIO = io.sockets
 
 io.on('connection', function(socket) {
 
@@ -64,7 +65,7 @@ io.on('connection', function(socket) {
         "player_id":1
       }
       io.sockets.emit('game_id', res);
-  
+
       search_stream = setInterval(function() {
         let res = {
             game:gameid,
@@ -93,8 +94,7 @@ io.on('connection', function(socket) {
 
       gameData[gameid][socket.id] = 0
       players = gameData[gameid]
-      // // console.log()
-      // if (Object.keys(players).length === 2){
+
       let res = {
         "code":200,
         "gameid":gameid,
@@ -103,9 +103,7 @@ io.on('connection', function(socket) {
         "player_id":2
       }
       io.sockets.emit('join', res)
-      // io.sockets.emit('player_update', game_id[gameid]);
-  
-      // }
+
 
     }else{
       let res = {
@@ -117,21 +115,21 @@ io.on('connection', function(socket) {
 
 
   }),
-
   socket.on('movement', function(data) {
     if (data != undefined){
       if (gameData[data.gameid] != undefined){
         gameData[data.gameid][data.socket] = data.y
-        io.sockets.emit('player_movement', gameData);
+        serverIO.emit('player_movement', gameData);
       }
       
     }
     
   }),
+  
   socket.on('ball', function(data) {
     if (data != undefined){
       if (gameData[data.gameid] != undefined){
-        io.sockets.emit('ball_move', data);
+        serverIO.emit('ball_move', data);
       }
     }
 
@@ -142,13 +140,32 @@ io.on('connection', function(socket) {
   });
 
   socket.on('score_update', function(res) {
-    io.sockets.emit("update_score",res)
+    serverIO.emit("update_score",res)
       
     })
 
     socket.on('detach', function(res) {
+
+      
+      if (res === "check"){
+        for (const [key, value] of Object.entries(gameData)) {
+
+          if (Object.keys(gameData[key]) !== undefined){
+            if (Object.keys(gameData[key]).length === 1){
+              
+              delete gameData[key]
+              stop_checking_for_player()
+              
+            }
+          }
+          
+          
+        }
+      }
+
+
       delete gameData[res]
-      console.log(gameData)
+
       })
 
   //   var players = {};

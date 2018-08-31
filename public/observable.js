@@ -45,16 +45,14 @@ class Observable {
             return () => el.removeEventListener(name, listener);
         });
     }
-    static fromSocketIO(el, name) {
+    static fromSocketIO(socket, el, name) {
         return new Observable((observer) => {
-            let socket = io();
             const stream = socket.on(name, (res) => observer.next(res));
             el.addEventListener(name, stream);
             return () => el.removeEventListener(name, stream);
         });
     }
-    static toSocketIO(name, request) {
-        let socket = io();
+    static toSocketIO(socket, name, request) {
         socket.emit(name, request);
     }
     static fromArray(arr) {

@@ -26,8 +26,8 @@ function pong() {
         "game_speed": 0.5,
         "ball_speed": 2,
         "player_side": "left",
-        "game_point": 2,
-        "paddle_height": 100,
+        "game_point": 11,
+        "paddle_height": 60,
         "dash_gap": 20,
         "padding": 50
     };
@@ -123,7 +123,7 @@ function pong() {
     class Ball {
         constructor() {
             this.ball_movement = (ball_starting_direction) => {
-                const gradients = [0, -Settings.settings.ball_speed, Settings.settings.ball_speed, -Settings.settings.ball_speed - 1, Settings.settings.ball_speed + 1];
+                const gradients = [0, -Settings.settings.ball_speed, Settings.settings.ball_speed, -Settings.settings.ball_speed - 0.5, Settings.settings.ball_speed + 0.5];
                 let x_change = gradients[2] * ball_starting_direction;
                 let y_change = Math.floor((Math.random() * 3));
                 const getBallDirection = (x_cord, y_cord, paddle) => {
@@ -135,16 +135,16 @@ function pong() {
                     };
                     const direction_change = () => {
                         GameSound.game_sound.collision.play();
-                        if (Number(y_cord) > Number(paddle.attr("y")) + (Number(paddle.attr("height")) / 2 + (Number(paddle.attr("height")) / 2) * 0.1)) {
-                            if (Number(y_cord) > Number(paddle.attr("y")) + (Number(paddle.attr("height")) / 2 + Number(paddle.attr("height")) * 0.4)) {
-                                return (x_change = (-x_change * gradients[4]), y_change = gradients[3], { x: x_cord, y: y_cord });
+                        if (Number(y_cord) > Number(paddle.attr("y")) + (Number(paddle.attr("height")) / 2 + (Number(paddle.attr("height")) / 2) * 0.05)) {
+                            if (Number(y_cord) > Number(paddle.attr("y")) + (Number(paddle.attr("height")) / 2 + Number(paddle.attr("height")) * 0.45)) {
+                                return (x_change = (-x_change * gradients[4]), y_change = gradients[4], { x: x_cord, y: y_cord });
                             }
                             else {
                                 return (x_change = (-x_change), y_change = gradients[2], { x: x_cord, y: y_cord });
                             }
                         }
-                        else if (Number(y_cord) < Number(paddle.attr("y")) + (Number(paddle.attr("height")) / 2 - (Number(paddle.attr("height")) / 2) * 0.1)) {
-                            if (Number(y_cord) < Number(paddle.attr("y")) + (Number(paddle.attr("height")) / 2 - Number(paddle.attr("height")) * 0.4)) {
+                        else if (Number(y_cord) < Number(paddle.attr("y")) + (Number(paddle.attr("height")) / 2 - (Number(paddle.attr("height")) / 2) * 0.05)) {
+                            if (Number(y_cord) < Number(paddle.attr("y")) + (Number(paddle.attr("height")) / 2 - Number(paddle.attr("height")) * 0.45)) {
                                 return (x_change = (-x_change * gradients[4]), y_change = gradients[3], { x: x_cord, y: y_cord });
                             }
                             else {
@@ -375,9 +375,13 @@ function pong() {
                     document.getElementById("score1").textContent = (SessionData.game_data.score_left).toString();
                     document.getElementById("score2").textContent = (SessionData.game_data.score_right).toString();
                     if (res.status == 1) {
+                        document.getElementById("loader2").style.display = "block";
+                        document.getElementById("singleplayer_button").style.display = "none";
                         SessionData.game_data.score_left > SessionData.game_data.score_right ? this.html_page.getGameBanner().textContent = "Left Won the Game" : this.html_page.getGameBanner().textContent = "Right Won the Game";
                         SessionData.game_data.round_started = true;
                         io().emit("detach", this.GAMEID);
+                        const refresh = () => { window.location.reload(); };
+                        setTimeout(refresh, 5000);
                     }
                 }
             };
@@ -429,6 +433,8 @@ function pong() {
                             io().emit("score_update", res);
                         }
                         if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point) {
+                            document.getElementById("singleplayer_button").style.display = "none";
+                            document.getElementById("loader2").style.display = "block";
                             GameSound.game_sound.fail.play();
                             SessionData.session_data.gameplay_main();
                             if (this.SOCKETID === this.USERS[0]) {
@@ -436,7 +442,7 @@ function pong() {
                             }
                             SessionData.session_data.end_ball_movement();
                             SessionData.session_data.current_ball.getBall().attr("r", 0);
-                            this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong";
+                            this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds.";
                             SessionData.game_data.score_left > SessionData.game_data.score_right ? this.html_page.getGameBanner().textContent = "Left Won the Game" : this.html_page.getGameBanner().textContent = "Right Won the Game";
                             SessionData.game_data.round_started = true;
                             let res = {
@@ -444,10 +450,12 @@ function pong() {
                                 "game_id": this.GAMEID,
                                 "score_1": SessionData.game_data.score_left,
                                 "score_2": SessionData.game_data.score_right,
-                                "message": "Thank You for Playing Multiplayer Pong"
+                                "message": "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
                             };
                             io().emit("score_update", res);
                             io().emit("detach", this.GAMEID);
+                            const refresh = () => { window.location.reload(); };
+                            setTimeout(refresh, 5000);
                         }
                     });
                 }
@@ -455,12 +463,10 @@ function pong() {
             this.createGame = () => {
                 const generateGameId = () => {
                     const socket = io(), _this = this;
-                    socket.emit('new_game');
+                    Observable.toSocketIO(socket, "new_game");
                     let allocated = [];
                     allocated[0] = false;
-                    socket.on('game_id', function (res) {
-                        _this.updatePlayerHost(res, allocated);
-                    });
+                    Observable.fromSocketIO(socket, document, "game_id").subscribe((res) => (_this.updatePlayerHost(res, allocated)));
                 };
                 this.createLobby();
                 generateGameId();
@@ -473,10 +479,8 @@ function pong() {
                 }
                 else {
                     const socket = io(), _this = this;
-                    socket.emit('join_game', game_id.toString());
-                    socket.on('join', function (res) {
-                        _this.updatePlayerClient(res);
-                    });
+                    Observable.toSocketIO(socket, "join_game", game_id.toString());
+                    Observable.fromSocketIO(socket, document, "join").subscribe((res) => (_this.updatePlayerClient(res)));
                 }
             };
             document.getElementById("creategame").onclick = this.createGame;
@@ -499,9 +503,7 @@ function pong() {
         updateLobbyPlayers() {
             const _this = this, socket = io();
             let trying_count = [0];
-            socket.on('player_update', function (res) {
-                _this.updateLobbyTable(res, socket, trying_count);
-            });
+            Observable.fromSocketIO(socket, document, "player_update").subscribe((res) => _this.updateLobbyTable(res, socket, trying_count));
         }
         startMultiplayerGame() {
             SessionData.session_data.gameplay_main ? (SessionData.session_data.gameplay_main(), SessionData.session_data.end_ball_movement(), SessionData.session_data.end_cpu_paddle_movement()) : undefined;
@@ -514,17 +516,16 @@ function pong() {
             document.getElementById("start").style.display = "none";
             let pongTable = new PongTable(HTMLPage.svg);
             let socket = io();
+            const observableSocket = Observable;
             let o = Observable
                 .fromEvent(document, "mousemove")
                 .map(({ clientY }) => ({ y: clientY }))
                 .map(({ y }) => ({ y: y - HTMLPage.svg.getBoundingClientRect().top }))
                 .filter(({ y }) => y <= (Number(HTMLPage.svg.getAttribute("height"))) - Number(SessionData.session_data.current_paddle.attr("height")) - Settings.settings.padding && y >= Settings.settings.padding)
                 .map((y) => ({ gameid: this.GAMEID, y: y.y, socket: this.SOCKETID }))
-                .subscribe(s => (socket.emit('movement', s)));
+                .subscribe(s => (observableSocket.toSocketIO(socket, 'movement', s)));
             const _this = this;
-            socket.on('player_movement', function (res) {
-                _this.updatePaddles(res, pongTable);
-            });
+            Observable.fromSocketIO(socket, document, "player_movement").subscribe((res) => _this.updatePaddles(res, pongTable));
             o = Observable
                 .fromEvent(HTMLPage.svg, "mousemove")
                 .map(({ clientX, clientY }) => ({ x: clientX, y: clientY }))
@@ -532,13 +533,18 @@ function pong() {
             console.log(this.USERS);
             if (this.SOCKETID === this.USERS[0]) {
                 Observable.interval(Settings.settings.game_speed)
-                    .subscribe(s => socket.emit('ball', { gameid: this.GAMEID, x: SessionData.session_data.current_ball.getBall().attr("cx"), y: SessionData.session_data.current_ball.getBall().attr("cy"), player_one: this.USERS[0], socket: this.SOCKETID }));
+                    .map(s => ({
+                    gameid: this.GAMEID,
+                    x: SessionData.session_data.current_ball.getBall().attr("cx"),
+                    y: SessionData.session_data.current_ball.getBall().attr("cy")
+                }))
+                    .subscribe(s => Observable.toSocketIO(socket, 'ball', s));
             }
             if (this.SOCKETID === this.USERS[1]) {
-                socket.on('ball_move', (res) => this.ballLocation(res));
+                Observable.fromSocketIO(socket, document, "ball_move").subscribe((res) => this.ballLocation(res));
             }
             if (this.SOCKETID === this.USERS[1]) {
-                socket.on('update_score', this.updateScore);
+                Observable.fromSocketIO(socket, document, "update_score").subscribe((res) => this.updateScore(res));
             }
             this.host_gameplay();
         }
@@ -549,58 +555,71 @@ function pong() {
             }
         }
         updateLobbyTable(res, socket, trying_count) {
-            if (res.game == this.GAMEID) {
-                if (res.socket == this.SOCKETID || this.SOCKETID == null || Object.keys((res.game_data)).length === 2) {
-                    trying_count[0]++;
-                    document.getElementById("player_wait_banner").textContent = "Waiting for players (Session will be terminated in 60 seconds) (" + trying_count + "/60)";
-                    if (trying_count[0] > 60) {
-                        trying_count[0] = 0;
-                        document.getElementById("player_wait_banner").textContent = "";
-                        socket.emit("stop_searching_for_players", this.GAMEID);
-                        this.GAMEID = null;
-                        this.SOCKETID = null;
-                        Multiplayer.switchToSP();
-                        alert("Timed Out. Please try again.");
-                    }
-                    if (Object.keys(res.game_data).length <= 2) {
-                        let table_div = document.getElementById("player_table");
-                        table_div.removeChild(table_div.childNodes[0]);
-                        let table = document.createElement("table"), tr = document.createElement("tr"), td_0 = document.createElement("td"), td_1 = document.createElement("td"), td_2 = document.createElement("td"), text_0 = document.createTextNode("Player Side"), text_1 = document.createTextNode("Socket ID"), text_2 = document.createTextNode("Ready");
-                        td_0.appendChild(text_0);
-                        td_1.appendChild(text_1);
-                        td_2.appendChild(text_2);
-                        tr.appendChild(td_0);
-                        tr.appendChild(td_1);
-                        tr.appendChild(td_2);
-                        table.appendChild(tr);
-                        let count = 0;
-                        for (const [key, value] of Object.entries(res.game_data)) {
-                            if (this.USERS[0] != key)
-                                this.USERS.push(key);
+            if (res.game_data !== undefined) {
+                console.log("its hereee");
+                document.getElementById("gameid").textContent = "Game ID : " + res.game;
+                if (res.game == this.GAMEID) {
+                    if (res.socket == this.SOCKETID || this.SOCKETID == null || Object.keys((res.game_data)).length === 2) {
+                        trying_count[0]++;
+                        document.getElementById("player_wait_banner").textContent = "Waiting for players (Session will be terminated in 60 seconds) (" + trying_count + "/60)";
+                        if (trying_count[0] > 60) {
+                            trying_count[0] = 0;
+                            document.getElementById("player_wait_banner").textContent = "";
+                            Observable.toSocketIO(socket, "stop_searching_for_players", this.GAMEID);
+                            this.GAMEID = null;
+                            this.SOCKETID = null;
+                            Multiplayer.switchToSP();
+                            alert("Timed Out. Please try again.");
                         }
-                        for (let i = 0; i < this.USERS.length; i++) {
-                            let tr = document.createElement("tr"), td_0 = document.createElement("td"), td_1 = document.createElement("td"), td_2 = document.createElement("td"), side = document.createTextNode((count === 0) ? "Left Side" : "Right Side"), text_1 = document.createTextNode(this.USERS[i]), tick = document.createElement("img");
-                            tick.setAttribute("height", "80px");
-                            tick.setAttribute("weight", "1000px");
-                            tick.setAttribute("src", "img/tick.png");
-                            td_0.appendChild(side);
+                        if (Object.keys(res.game_data).length <= 2) {
+                            let table_div = document.getElementById("player_table");
+                            table_div.removeChild(table_div.childNodes[0]);
+                            let table = document.createElement("table"), tr = document.createElement("tr"), td_0 = document.createElement("td"), td_1 = document.createElement("td"), td_2 = document.createElement("td"), text_0 = document.createTextNode("Player Side"), text_1 = document.createTextNode("Socket ID"), text_2 = document.createTextNode("Ready");
+                            td_0.appendChild(text_0);
                             td_1.appendChild(text_1);
-                            td_2.appendChild(tick);
+                            td_2.appendChild(text_2);
                             tr.appendChild(td_0);
                             tr.appendChild(td_1);
                             tr.appendChild(td_2);
                             table.appendChild(tr);
-                            count++;
-                        }
-                        table_div.appendChild(table);
-                        if ((Object.keys(res.game_data).length === 2)) {
-                            document.getElementById("loader").style.display = "none";
-                            document.getElementById("player_wait_banner").style.display = "block";
-                            document.getElementById("player_wait_banner").textContent = "Both Players Connected. To Start the Game, the Host has to click on the table.";
-                            this.startMultiplayerGame();
-                            if (!socket.sentMydata) {
-                                socket.emit("stop_searching_for_players");
-                                socket.sentMydata = true;
+                            let count = 0;
+                            for (const [key, value] of Object.entries(res.game_data)) {
+                                if (this.USERS[0] != key)
+                                    this.USERS.push(key);
+                            }
+                            for (let i = 0; i <= 1; i++) {
+                                let tr = document.createElement("tr"), td_0 = document.createElement("td"), td_1 = document.createElement("td"), td_2 = document.createElement("td"), text_1 = undefined, tick = undefined, side = document.createTextNode((count === 0) ? "Left Side" : "Right Side");
+                                if (this.USERS[i] !== undefined) {
+                                    text_1 = document.createTextNode(this.USERS[i]);
+                                    tick = document.createElement("img");
+                                    tick.setAttribute("src", "img/tick.png");
+                                }
+                                else {
+                                    text_1 = document.createTextNode("Waitng...");
+                                    tick = document.createElement("img");
+                                    tick.setAttribute("src", "img/tick.png");
+                                }
+                                tick.setAttribute("height", "80px");
+                                tick.setAttribute("weight", "1000px");
+                                td_0.appendChild(side);
+                                td_1.appendChild(text_1);
+                                td_2.appendChild(tick);
+                                tr.appendChild(td_0);
+                                tr.appendChild(td_1);
+                                tr.appendChild(td_2);
+                                table.appendChild(tr);
+                                count++;
+                            }
+                            table_div.appendChild(table);
+                            if ((Object.keys(res.game_data).length === 2)) {
+                                document.getElementById("loader").style.display = "none";
+                                document.getElementById("player_wait_banner").style.display = "block";
+                                document.getElementById("player_wait_banner").textContent = "Both Players Connected. To Start the Game, the Host has to click on the table.";
+                                this.startMultiplayerGame();
+                                if (!socket.sentMydata) {
+                                    Observable.toSocketIO(socket, "stop_searching_for_players");
+                                    socket.sentMydata = true;
+                                }
                             }
                         }
                     }
@@ -609,9 +628,7 @@ function pong() {
         }
         updatePaddles(res, pongTable) {
             let left_paddle = SessionData.session_data.current_paddle;
-            left_paddle.attr("y", res[this.GAMEID][this.USERS[0]]);
             let right_paddle = SessionData.session_data.opponent_paddle;
-            right_paddle.attr("y", res[this.GAMEID][this.USERS[1]]);
             pongTable.paddle_movement(left_paddle)(res[this.GAMEID][this.USERS[0]]);
             pongTable.paddle_movement(right_paddle)(res[this.GAMEID][this.USERS[1]]);
         }
@@ -621,6 +638,8 @@ function pong() {
                     allocated[0] = true;
                     this.GAMEID = res.gameid;
                     this.SOCKETID = res.socket_id;
+                    console.log("ha");
+                    console.log(res.gameid);
                     document.getElementById("gameid").textContent = "Game ID : " + res.gameid;
                     document.getElementById("player_wait_banner").style.display = "block";
                 }
@@ -648,12 +667,9 @@ function pong() {
     }
     Multiplayer.MULTIPLAYER_STATUS = false;
     Multiplayer.switchToSP = () => {
-        document.getElementById("lobby").style.display = "none";
-        document.getElementById("game").style.display = "block";
-        document.getElementById("options").style.display = "block";
-        document.getElementById("singleplayer").style.display = "none";
-        document.getElementById("multiplayer").style.display = "block";
-        window.location.reload();
+        io().emit("detach", "check");
+        const refresh = () => { window.location.reload(); };
+        setTimeout(refresh, 500);
     };
     const main = () => {
         let game = new Gameplay(), html = new HTMLPage(game), multiplayer = new Multiplayer(html);
