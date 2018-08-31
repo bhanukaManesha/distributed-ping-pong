@@ -31,24 +31,24 @@ class SessionData {
 
   } = {
     // Assigning default values to initialize the variables
-    current_paddle :undefined,
-    opponent_paddle :undefined,
-    current_ball : undefined ,
-    gameplay_main:() => null,
-    end_cpu_paddle_movement:() => null,
-    end_ball_movement:() => null
+    current_paddle :undefined,                      // Setting the default value for current_paddle as undefined
+    opponent_paddle :undefined,                     // Setting the default value for opponent_paddle as undefined
+    current_ball : undefined ,                      // Setting the default value for current_ball as undefined
+    gameplay_main:() => null,                       // Setting the default value for gameplay_main as a function that returns null
+    end_cpu_paddle_movement:() => null,             // Setting the default value for end_cpu_paddle_movement as a function that returns null
+    end_ball_movement:() => null                    // Setting the default value for end_ball_movement as a function that returns null
   }
 
   // Stores the game data per session
   static game_data = {
-    "score_left":0,
-    "score_right":0,
-    "round_started":false,
-    "start_direction":1
+    "score_left":0,                                 // Initializing the score left as 0  
+    "score_right":0,                                // Initializing the score right as 0  
+    "round_started":false,                          // Initializing the round started as false  
+    "start_direction":1                             // Initializing the start direction as so that left will be serving always  
   }
 
-  constructor() {
-  }
+  // Empty Constructor
+  constructor() {}
 
 }
 
@@ -58,15 +58,15 @@ class SessionData {
  */
 class Settings {
   static settings = {
-    "table_height":600,
-    "table_width":600,
-    "game_speed" : 0.5,
-    "ball_speed" : 2,
-    "player_side" : "left",
-    "game_point":11,
-    "paddle_height":60,
-    "dash_gap": 20,
-    "padding" : 50
+    "table_height":600,                             // Initializing the table height as 600px
+    "table_width":600,                              // Initializing the table width as 600px
+    "game_speed" : 1,                               // Initializing the game speed as 1, this is the rate in which all of the Observable.intervals will fire data 
+    "ball_speed" : 2,                               // Initializing the ball_speed as 2, this is number of pixels the ball changes every game_speed milliseconds
+    "player_side" : "left",                         // Initializing the player_side as left, so that by defalut the user will be initlized to the left
+    "game_point":11,                                // Initializing the game point as 11, this is the point at which the game ends
+    "paddle_height":60,                             // Initializing the paddle height to 60px by default
+    "dash_gap": 20,                                 // Initializing the dash_gap in the pong table to 20 by default
+    "padding" : 50                                  // Initializing the padding around the box(i.e the buffer area for the mouse to move to)
   }
 }
 
@@ -76,8 +76,8 @@ class Settings {
  */
 class GameSound {
   static game_sound = {
-    collision:new Audio(),
-    fail:new Audio()
+    collision:new Audio(),                          // Initialzing the collison audio to new HTMLAudio elements
+    fail:new Audio()                                // Initialzing the fail audio to new HTMLAudio elements
   }
 }
 
@@ -86,7 +86,7 @@ class GameSound {
  */
 class PongTable {
 
-  private paddle:Elem|null = null;
+  private paddle:Elem|null = null;                  // Varibale to store the refernce to a paddle
 
   /**
    * Initializes the class and sets the default player side on the table and intialize the 
@@ -108,15 +108,21 @@ class PongTable {
    * This function initializes the palyer paddle using the setttings defined by the player or by default
    */
   setDefaultPlayerSide = ():void => {
+    // Check if the player side is left 
     Settings.settings.player_side === "left"? 
-    (SessionData.session_data.current_paddle! = this.createPaddle(Settings.settings.paddle_height,"left"),
-    SessionData.session_data.opponent_paddle! = this.createPaddle(Settings.settings.paddle_height,"right") )
-        :(SessionData.session_data.current_paddle! = this.createPaddle(Settings.settings.paddle_height,"right"),
+        // If the player side is left then make the current paddle left and opponenet paddle right
+        (SessionData.session_data.current_paddle! = this.createPaddle(Settings.settings.paddle_height,"left"),
+        SessionData.session_data.opponent_paddle! = this.createPaddle(Settings.settings.paddle_height,"right") )
+        :
+        // If the player side is right then make the current paddle right and opponenet paddle left
+        (SessionData.session_data.current_paddle! = this.createPaddle(Settings.settings.paddle_height,"right"),
         SessionData.session_data.opponent_paddle! = this.createPaddle(Settings.settings.paddle_height,"left") )
   }
 
   /**
    * This function is used to create the paddles on the pong table
+   * @param height the height of the new paddle
+   * @param side the side of the new paddle on the pong table
    */
   createPaddle(height:number,side:string):Elem{
     if (side == "left"){
@@ -161,6 +167,7 @@ class PongTable {
    * This function is used to update the current position of the paddle using the mouse move given the reference to the paddle
    */
   move_paddle = (paddle:Elem) => {
+        // Creating an observable from the mouse move
         const 
           o = Observable
                 .fromEvent<MouseEvent>(HTMLPage.svg, "mousemove")
@@ -223,8 +230,9 @@ class PongTable {
   
             }
 
-          // Initializing the table lines and the scores
+          // Initializing the table lines 
           dashed_line(Settings.settings.dash_gap)
+          // Initialize the scores on the table
           score()
   
   }
@@ -239,7 +247,7 @@ class PongTable {
  */
 class Ball {
 
-    private ball:Elem;        // Variable to store a reference to the ball
+    private ball:Elem;              // Variable to store a reference to the ball
 
     /**
      * Constructor to initialize the ball and assign it to the private varaibles
@@ -257,6 +265,7 @@ class Ball {
      * Accessor for the private ball attribute
      */
     getBall():Elem{
+      // Return the private ball attribute
       return this.ball
     }
    
@@ -334,14 +343,19 @@ class Ball {
         return Observable.interval(Settings.settings.game_speed)
         .map(s=>(
           {x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
+        // Check if the ball is colliding with the left paddle
         .map(
             ({x,y})=> getBallDirection(x,y,SessionData.session_data.current_paddle!))
+        // Check if the ball is colliding with the right paddle 
         .map(
             ({x,y})=> getBallDirection(x,y,SessionData.session_data.opponent_paddle!))
         // Calculating the bottom side to change the direction of the ball
         .map(
             ({x,y})=> Number(y)>Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.ball.attr("r")) ? 
-                (GameSound.game_sound.collision.play(),y_change = (-y_change),
+                // Play game sound for collision
+                (GameSound.game_sound.collision.play(),
+                // Negating the y change value
+                y_change = (-y_change),
                   {x:x,y:y}
                 )
                 :
@@ -351,7 +365,10 @@ class Ball {
         // Calculating the top side to change the direction of the ball
         .map(
             ({x,y})=> Number(y)<Settings.settings.padding+Number(this.ball.attr("r")) ? 
-                (GameSound.game_sound.collision.play(),y_change = (-y_change),
+                // Play game sound for collision
+                (GameSound.game_sound.collision.play(),
+                // Negating the y change value
+                y_change = (-y_change),
                   {x:x,y:y}
                 )
                 :
@@ -382,36 +399,61 @@ class CPUPaddleMovement{
 
   // Passing in the reference to the left or right paddle to be controlled
   constructor(paddle:Elem){
+      // Assigning the passed in paddle to the private paddle attribute
       this.paddle = paddle
   }
   
+  /**
+   * The function is used to calculate the CPU paddle movement
+   */
   private cpu_paddle_movement = ():()=> void => {
-
+    // Updating the paddle increament speed as the same as the ball speed so that by defalut it is able to keep up
+    // with the ball. Unless the user hits the top or bottom 5%, then there is a possibility not to hit the center,
+    // since it is updating slower than the ball
     const paddle_increment = Settings.settings.ball_speed,
 
+    /**
+     * Function used to increament the paddle according to the ball movement
+     */
     increment = (y:number) =>
     {
+      // Check If the center of the paddle is less than the center of the ball
       if (Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 <y){
+        // if the center of the paddle is less than the center of the ball then increase the 
+        // paddle y value inorder for the paddle to go down
         return Number(this.paddle!.attr("y")) + paddle_increment 
+      // Check If the center of the paddle is greater than the center of the ball
       }else if (Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 >y){
+        // if the center of the paddle is greater than the center of the ball then decrease the 
+        // paddle y value inorder for the paddle to go up
         return Number(this.paddle!.attr("y")) - paddle_increment
       }else{
+        // If the paddle center is equal to the ball center, then the paddle attribute is not changed
         return Number(this.paddle!.attr("y")) 
       }
     }
   
+    // Using an observable to update the AI every (decided by the user) milliseconds
     return Observable.interval(Settings.settings.game_speed)
+          // Getting the y axis of the ball and mapping it to an object {y}
           .map(s=>(
             {y:SessionData.session_data.current_ball!.getBall().attr('cy') }))
-          .filter((y) => !(Number(y) <= (Number(HTMLPage.svg.getAttribute("height"))) - (Number(this.paddle!.attr("height"))/2) - Settings.settings.padding) && !(Number(y) >= Settings.settings.padding))  
+          // Filtering the values less 
+          // .filter((y) => !(Number(y) <= (Number(HTMLPage.svg.getAttribute("height"))) - (Number(this.paddle!.attr("height"))/2) - Settings.settings.padding) && !(Number(y) >= Settings.settings.padding))  
+          // Getting the paddle increment to change the locatiomn of the paddle
           .map(({y})=>(
             {y:increment(Number(y))}))
+          // Changing the y axis of the paddle
           .subscribe(({y})=>(
             this.paddle!.attr("y",y.toString())))
 
     }
 
+    /**
+     * Accessor for the cpu paddle movement function
+     */
     getCPUPaddleMovement(){
+      // Returning the cpu paddle movement function, which is the unsubscribe funtion for the cpu paddle movement observable
       return this.cpu_paddle_movement
     }
 }
