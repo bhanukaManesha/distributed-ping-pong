@@ -307,28 +307,30 @@ class Ball {
                                   // If it is in the bottom 40% from the center then increase then jusr change the direction of the ball
                                   return (x_change = (-x_change),y_change = gradients[2],{x:x_cord,y:y_cord})
                                 }
-                              // Check whether the collision is in the bottom 45% of the paddle
+                              // Check whether the collision is in the top 45% of the paddle
                               } else if (Number(y_cord)<Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 - (Number(paddle.attr("height"))/2)*0.05) ){
+                                // Check whether the collision is in the top 5% of the paddle
                                 if (Number(y_cord)<Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 - Number(paddle.attr("height"))*0.45) ) {
-                                  
+                                  // If it is in the bottom 5% then increase the ball speed by 0.5
                                   return (x_change = (-x_change*gradients[4]),y_change = gradients[3],{x:x_cord,y:y_cord})
                                 }else{
-                                  
+                                  // If it is in the top 40% from the center then increase then jusr change the direction of the ball
                                   return (x_change = (-x_change),y_change = gradients[1],{x:x_cord,y:y_cord})
                                 }
                               }else{
-                                
+                                // If it is in the middle 10% of the paddle get a random y change (eg.0,1,-1) to randomize the game
                                 return (x_change = (-x_change),y_change = gradients[Math.floor((Math.random() * 3))],{x:x_cord,y:y_cord})
                               }
             }
 
+            // Check whether there's paddle collison if so return the changed direction cordinates or just return the coordinates
           return paddle_collison() ? 
                 (direction_change())
                 :
                   {x:x_cord,y:y_cord}
           }
         
-
+        // Ball movement is based on a Observable sending data every millisecond decided by the user
         return Observable.interval(Settings.settings.game_speed)
         .map(s=>(
           {x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
@@ -336,6 +338,7 @@ class Ball {
             ({x,y})=> getBallDirection(x,y,SessionData.session_data.current_paddle!))
         .map(
             ({x,y})=> getBallDirection(x,y,SessionData.session_data.opponent_paddle!))
+        // Calculating the bottom side to change the direction of the ball
         .map(
             ({x,y})=> Number(y)>Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.ball.attr("r")) ? 
                 (GameSound.game_sound.collision.play(),y_change = (-y_change),
@@ -345,6 +348,7 @@ class Ball {
                 (y_change = y_change,
                   {x:x,y:y}
                 ))
+        // Calculating the top side to change the direction of the ball
         .map(
             ({x,y})=> Number(y)<Settings.settings.padding+Number(this.ball.attr("r")) ? 
                 (GameSound.game_sound.collision.play(),y_change = (-y_change),
@@ -354,9 +358,11 @@ class Ball {
                 (y_change = y_change,
                   {x:x,y:y}
                 ))      
+        // Adding the current change to the new change 
         .map(({x,y})=>(
           {x:x_change+Number(x) ,y:y_change+Number(y) }))
 
+        // Subscribing to chnage the ball x attribute and y attribute
         .subscribe(({x,y})=>(
           this.ball.attr('cx', x),
           this.ball.attr('cy', y))
@@ -368,10 +374,13 @@ class Ball {
     }
 }
 
-
+/**
+ * This class is used to create the AI Paddle and manipulate it
+ */
 class CPUPaddleMovement{
   private paddle:Elem|null;
 
+  // Passing in the reference to the left or right paddle to be controlled
   constructor(paddle:Elem){
       this.paddle = paddle
   }
