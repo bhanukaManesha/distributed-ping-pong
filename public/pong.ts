@@ -22,14 +22,15 @@ class SessionData {
 
   // Stores the svg element data per session and the data for ending the relavant observables
   static session_data : {
-    current_paddle :Elem | undefined,
-    opponent_paddle :Elem | undefined,
-    current_ball : Ball | undefined,
-    gameplay_main:()=>void ,
-    end_cpu_paddle_movement:()=>void ,
-    end_ball_movement:()=>void
+    current_paddle :Elem | undefined,               // Stores a reference to the left paddle
+    opponent_paddle :Elem | undefined,              // Stores a reference to the reight paddle
+    current_ball : Ball | undefined,                // Stores a reference to the current ball
+    gameplay_main:()=>void ,                        // Stores a reference to the unsubscribe method of the game_play observable
+    end_cpu_paddle_movement:()=>void ,              // Stores a reference to the unsubscribe method of the AI Paddle observable
+    end_ball_movement:()=>void                      // Stores a reference to the unsubscribe method of the ball observable
 
   } = {
+    // Assigning default values to initialize the variables
     current_paddle :undefined,
     opponent_paddle :undefined,
     current_ball : undefined ,
@@ -53,7 +54,7 @@ class SessionData {
 
 /**
  * Static Class to store the user entered settings to be used in the game.
- * They are set to default value
+ * They are set to default values
  */
 class Settings {
   static settings = {
@@ -62,8 +63,8 @@ class Settings {
     "game_speed" : 0.5,
     "ball_speed" : 2,
     "player_side" : "left",
-    "game_point":2,
-    "paddle_height":100,
+    "game_point":11,
+    "paddle_height":60,
     "dash_gap": 20,
     "padding" : 50
   }
@@ -104,7 +105,7 @@ class PongTable {
   }
 
   /**
-   * 
+   * This function initializes the palyer paddle using the setttings defined by the player or by default
    */
   setDefaultPlayerSide = ():void => {
     Settings.settings.player_side === "left"? 
@@ -114,8 +115,12 @@ class PongTable {
         SessionData.session_data.opponent_paddle! = this.createPaddle(Settings.settings.paddle_height,"left") )
   }
 
+  /**
+   * This function is used to create the paddles on the pong table
+   */
   createPaddle(height:number,side:string):Elem{
     if (side == "left"){
+      // If the side is left create a left paddle
       return this.paddle = new Elem(HTMLPage.svg, 'rect')
       .attr("id","paddle_left")
       .attr('width', 5)
@@ -126,6 +131,7 @@ class PongTable {
     }
     else
     {
+      // If the paddle is right create a right paddle
     return this.paddle = new Elem(HTMLPage.svg, 'rect')
       .attr("id","paddle_right")
       .attr('width', 5)
@@ -137,34 +143,48 @@ class PongTable {
 
   }
 
+  /**
+   * Accessor for the paddle
+   */
   getPaddle():Elem{
     return this.paddle!
   }
 
+  /**
+   * This curried function is used to update the paddles given the new y coordinates and the paddle, since the paddle only moves up and down
+   */
   paddle_movement = (paddle:Elem)=>(y_cord:string):void => {
     paddle.attr("y",y_cord)
-    // paddle.setAttribute("y",y_cord)
   }
 
+  /**
+   * This function is used to update the current position of the paddle using the mouse move given the reference to the paddle
+   */
   move_paddle = (paddle:Elem) => {
         const 
           o = Observable
                 .fromEvent<MouseEvent>(HTMLPage.svg, "mousemove")
                 .map(({clientX, clientY})=>({x: clientX, y: clientY}));
 
+        // Creating an observable from the mouse move event and uses the clientY cordinate to update the paddle movement
         o.map(({x,y}) => `${y}`)
-          // .map(y=>Number(y) - svg.getBoundingClientRect().top - 50)
           .map(y=>(Number(y) - Number(HTMLPage.svg.style.paddingTop) -HTMLPage.svg.getBoundingClientRect().top) - Number(paddle.attr("height"))/2 )
           .filter((y) => y <= (Number(HTMLPage.svg.getAttribute("height"))) - Number(paddle.attr("height")) - Settings.settings.padding && y >= Settings.settings.padding)
           .subscribe(y => this.paddle_movement(paddle)(y.toString()));
 
+        // Using the observable from the mouse move event to hide the cursour when the move is over the svg to give the illution of the user controling the paddle
         o.subscribe(_=>HTMLPage.svg.style.cursor = "none")
 
   }
 
-
+  /**
+   * This method is used to initialize a table with the dassh lines and the score in the svg canvas
+   */
   initalizeTable = (svg:HTMLElement) => {
 
+    /**
+     * Function used to initialize the dashes in the pong table
+     */
     const dash =(y:number)=> new Elem(svg, 'rect')
               .attr('width', 5)
               .attr('height', 10)
@@ -172,13 +192,18 @@ class PongTable {
               .attr('y', Number(y))
               .attr('fill', '#FFF'),
   
+          /**
+           * Function used to combine multiple dashes using recursion to create the dashed line
+           */
           dashed_line = (gap:number)=>{
             const dashed_line_aux = (y_value:number):number|undefined=> {
-              // return (padding >= y_value)? 0 : (dash(y_value),dashed_line_aux(y_value-gap))
               return (Settings.settings.padding > y_value)? 0 : (dash(y_value),dashed_line_aux(y_value-gap))
             }
             dashed_line_aux(Number(svg.getAttribute("y"))! + Number(svg.getAttribute("height")) - gap - Settings.settings.padding )
           },  
+          /**
+           * Function used to create the letters for score
+           */
           score = () => {new Elem(svg,"text")
               .attr("x",Number(svg.getAttribute("width"))/4)
               .attr("y",Number(svg.getAttribute("height"))*2/8)
@@ -209,10 +234,16 @@ class PongTable {
 }
 
 
+/**
+ * This class is used to create the svg ball element that is being used through out the game
+ */
 class Ball {
 
-    private ball:Elem;
+    private ball:Elem;        // Variable to store a reference to the ball
 
+    /**
+     * Constructor to initialize the ball and assign it to the private varaibles
+     */
     constructor(){
         this.ball = new Elem(HTMLPage.svg, 'circle')
         .attr("id","ball")
@@ -222,48 +253,71 @@ class Ball {
         .attr('fill', '#FFF')
     }
 
+    /**
+     * Accessor for the private ball attribute
+     */
     getBall():Elem{
       return this.ball
     }
    
+    /**
+     * Function that creates the trejactory of the ball upon collisons with the paddles, sides and out of bounds
+     */
     ball_movement = (ball_starting_direction:number) => {
-        //  mousemove = Observable.fromEvent<MouseEvent>(svg, 'mousemove')
 
-        const gradients = [0,-Settings.settings.ball_speed,Settings.settings.ball_speed,-Settings.settings.ball_speed-1,Settings.settings.ball_speed+1]
+        // Accelaration factor or gradient of the curve
+        // eg : gradients = [0, -1 , 1 , -1.5 , 1.5] 
+        const gradients = [0,-Settings.settings.ball_speed,Settings.settings.ball_speed,-Settings.settings.ball_speed-0.5,Settings.settings.ball_speed+0.5]
 
+        // Starting gradient factor for the ball and the start direction of the ball
         let x_change = gradients[2]*ball_starting_direction
+        // Starting y accelaration for the ball using a random value between the gradients [0,-1,1] ( if the ball speed is 1)
         let y_change = Math.floor((Math.random() * 3))
 
+        /**
+         * Function used to get the ball direction if the trajectory is blocked by a paddle, if there is not collison ot will just keep on moving in the same gradients
+         */
         const getBallDirection = (x_cord:string,y_cord:string,paddle:Elem) : {x:string,y:string}=>{
 
+            /**
+             * Function used to calculate whether there is a collision with the paddle
+             */
             const paddle_collison = ():boolean=>{
 
+                                // If the ball center + radius is inside the limits of a paddle, then it is considered to be a paddle collision
                                 return (Number(x_cord) - Number(this.ball.attr("r")) < Number(paddle.attr("x"))+ Number(paddle.attr("width"))
                                 && Number(x_cord) + Number(this.ball.attr("r")) >Number(paddle.attr("x"))-Number(paddle.attr("width"))
                                 && Number(y_cord) + Number(this.ball.attr("r")) > Number(paddle.attr("y")) 
                                 && Number(y_cord) < Number(paddle.attr("y"))+Number(paddle.attr("height")) + Number(this.ball.attr("r")))
             }
 
+            /**
+             * This fucntion is used if there is a paddle collision, to calculate where the ball is colliding with the paddle and to take the appropirate direction change accordingly
+             */
             const direction_change = ():{x:string,y:string}=>{
+                              // If there is a paddle collision to play the collision sound
                               GameSound.game_sound.collision.play()
-                              if (Number(y_cord)>  Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 + (Number(paddle.attr("height"))/2)*0.1)   ){
-                                if (Number(y_cord)>  Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 + Number(paddle.attr("height"))*0.4)   ){
+                              // Check whether the collision is in the bottom 45% of the paddle
+                              if (Number(y_cord)>  Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 + (Number(paddle.attr("height"))/2)*0.05)   ){
+                                // Check whether the collision is in the bottom 5% of the paddle
+                                if (Number(y_cord)>  Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 + Number(paddle.attr("height"))*0.45)   ){   
+                                  // If it is in the bottom 5% then increase the ball speed by 0.5
+                                  return (x_change = (-x_change*gradients[4]),y_change = gradients[4],{x:x_cord,y:y_cord})
+                                }else{
+                                  // If it is in the bottom 40% from the center then increase then jusr change the direction of the ball
+                                  return (x_change = (-x_change),y_change = gradients[2],{x:x_cord,y:y_cord})
+                                }
+                              // Check whether the collision is in the bottom 45% of the paddle
+                              } else if (Number(y_cord)<Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 - (Number(paddle.attr("height"))/2)*0.05) ){
+                                if (Number(y_cord)<Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 - Number(paddle.attr("height"))*0.45) ) {
                                   
                                   return (x_change = (-x_change*gradients[4]),y_change = gradients[3],{x:x_cord,y:y_cord})
                                 }else{
-                                  return (x_change = (-x_change),y_change = gradients[2],{x:x_cord,y:y_cord})
-                                }
-                                
-
-                              } else if (Number(y_cord)<Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 - (Number(paddle.attr("height"))/2)*0.1) ){
-                                if (Number(y_cord)<Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 - Number(paddle.attr("height"))*0.4) ) {
-                                  return (x_change = (-x_change*gradients[4]),y_change = gradients[3],{x:x_cord,y:y_cord})
-                                }else{
+                                  
                                   return (x_change = (-x_change),y_change = gradients[1],{x:x_cord,y:y_cord})
                                 }
-
-
                               }else{
+                                
                                 return (x_change = (-x_change),y_change = gradients[Math.floor((Math.random() * 3))],{x:x_cord,y:y_cord})
                               }
             }
@@ -615,8 +669,9 @@ class Multiplayer {
     document.getElementById("multiplayer")!.style.display = "none"
 
     Multiplayer.MULTIPLAYER_STATUS = true
-
+    
     game_id?document.getElementById("gameid")!.textContent = "Game ID :" + game_id:undefined
+    
     this.updateLobbyPlayers()
   }
 
@@ -627,9 +682,10 @@ class Multiplayer {
       
       let trying_count = [0]
   
-      socket.on('player_update',function(res:any){
-        _this.updateLobbyTable(res,socket,trying_count)
-      });
+      Observable.fromSocketIO(socket,document,"player_update").subscribe((res)=>_this.updateLobbyTable(res,socket,trying_count))
+      // socket.on('player_update',function(res:any){
+      //   _this.updateLobbyTable(res,socket,trying_count)
+      // });
 
       
       
@@ -658,6 +714,9 @@ class Multiplayer {
 
       // Getting a reference to the socket from the server
       let socket = io()
+      const observableSocket = Observable
+
+
 
       // Sending the paddle movements to the server to be sent back to all the clients
       let o = Observable
@@ -666,13 +725,16 @@ class Multiplayer {
       .map(({y}) => ({y: y-HTMLPage.svg.getBoundingClientRect().top}))
       .filter(({y}) => y <= (Number(HTMLPage.svg.getAttribute("height"))) - Number(SessionData.session_data.current_paddle!.attr("height")) - Settings.settings.padding && y >= Settings.settings.padding)  
       .map((y)=> ({gameid : this.GAMEID, y:y.y,socket:this.SOCKETID } ))
-      .subscribe(s=>(socket.emit('movement', s)))
+      .subscribe(s=>(observableSocket.toSocketIO(socket,'movement', s)))
+      // .subscribe(s=>(socket.emit('movement', s)))
       
       // Updating the paddle movements from the users to be displayed
       const _this = this;
-      socket.on('player_movement',function(res:any){
-        _this.updatePaddles(res,pongTable)}
-      );
+
+      Observable.fromSocketIO(socket,document,"player_movement").subscribe((res)=>_this.updatePaddles(res,pongTable))
+      // socket.on('player_movement',function(res:any){
+      //   _this.updatePaddles(res,pongTable)}
+      // );
 
 
       // Hiding cursor when over the svg
@@ -685,16 +747,24 @@ class Multiplayer {
       // Host sending the cordinates to update the ball
       if (this.SOCKETID === this.USERS[0]){
           Observable.interval(Settings.settings.game_speed)
-          .subscribe(s => socket.emit('ball', {gameid:this.GAMEID,x:SessionData.session_data.current_ball!.getBall().attr("cx"),y:SessionData.session_data.current_ball!.getBall().attr("cy"), player_one:this.USERS[0], socket: this.SOCKETID}))
+          .map(s=>({
+            gameid:this.GAMEID,
+            x:SessionData.session_data.current_ball!.getBall().attr("cx"),
+            y:SessionData.session_data.current_ball!.getBall().attr("cy")}))
+          .subscribe(s => Observable.toSocketIO(socket,'ball', s))
+          // .subscribe(s => socket.emit('ball', {gameid:this.GAMEID,x:SessionData.session_data.current_ball!.getBall().attr("cx"),y:SessionData.session_data.current_ball!.getBall().attr("cy"), player_one:this.USERS[0], socket: this.SOCKETID}))
         }
 
       // Client updating the ball
       if (this.SOCKETID === this.USERS[1]){
-        socket.on('ball_move',(res:any) =>this.ballLocation(res));
+        Observable.fromSocketIO(socket,document,"ball_move").subscribe((res)=>this.ballLocation(res))
+        // socket.on('ball_move',(res:any) =>this.ballLocation(res));
+
       }
 
       if (this.SOCKETID === this.USERS[1]){
-        socket.on('update_score', this.updateScore)
+        Observable.fromSocketIO(socket,document,"update_score").subscribe((res)=>this.updateScore(res))
+        // socket.on('update_score', this.updateScore)
       }
 
       // SessionData.session_data.end_ball_movement= Ball.ball_movement(SessionData.game_data.start_direction)
@@ -726,10 +796,13 @@ class Multiplayer {
       document.getElementById("score2")!.textContent = (SessionData.game_data.score_right).toString()
 
       if (res.status == 1){
+        document.getElementById("loader2")!.style.display = "block"
+        document.getElementById("singleplayer_button")!.style.display = "none"
         SessionData.game_data.score_left>SessionData.game_data.score_right?this.html_page.getGameBanner().textContent = "Left Won the Game":this.html_page.getGameBanner().textContent = "Right Won the Game"
         SessionData.game_data.round_started = true
         io().emit("detach",this.GAMEID)
-        // Multiplayer.switchToSP()
+        const refresh = () => {window.location.reload()}
+        setTimeout(refresh,5000)
 
       }
     }
@@ -795,6 +868,8 @@ class Multiplayer {
       
       if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point){
         
+              document.getElementById("singleplayer_button")!.style.display = "none"
+              document.getElementById("loader2")!.style.display = "block"
               GameSound.game_sound.fail.play()
               SessionData.session_data.gameplay_main()
               if (this.SOCKETID === this.USERS[0]){
@@ -803,7 +878,7 @@ class Multiplayer {
               SessionData.session_data.end_ball_movement()
               
               SessionData.session_data.current_ball!.getBall().attr("r",0)
-              this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong"
+              this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
               SessionData.game_data.score_left>SessionData.game_data.score_right?this.html_page.getGameBanner().textContent = "Left Won the Game":this.html_page.getGameBanner().textContent = "Right Won the Game"
               // document.getElementById("player_turn")!.style.display = "none"
               SessionData.game_data.round_started = true
@@ -813,14 +888,15 @@ class Multiplayer {
                 "game_id" : this.GAMEID,
                 "score_1" : SessionData.game_data.score_left,
                 "score_2" : SessionData.game_data.score_right,
-                "message" : "Thank You for Playing Multiplayer Pong"
+                "message" : "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
               }
               io().emit("score_update",res)
 
               io().emit("detach",this.GAMEID)
 
-
-              // setTimeout(Multiplayer.switchToSP(),3000)
+              const refresh = () => {window.location.reload()}
+              setTimeout(refresh,5000)
+             
               
               
   
@@ -836,106 +912,128 @@ class Multiplayer {
   }
 
 private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
-
-  if (res.game == this.GAMEID){
-    if (res.socket == this.SOCKETID || this.SOCKETID == null || Object.keys((res.game_data)).length === 2){
-  
-      trying_count[0]++
-    
-      document.getElementById("player_wait_banner")!.textContent! =  "Waiting for players (Session will be terminated in 60 seconds) (" + trying_count + "/60)"
-    
-      if (trying_count[0]>60){
-        trying_count[0] = 0
-        document.getElementById("player_wait_banner")!.textContent! =  ""
-        
-        socket.emit("stop_searching_for_players",this.GAMEID)
-    
-        this.GAMEID = null
-        this.SOCKETID = null
-
-        //switch to singleplayer mode
-        Multiplayer.switchToSP()
-        alert("Timed Out. Please try again.")
-      }
+  if (res.game_data !== undefined){
+    console.log("its hereee")
+    document.getElementById("gameid")!.textContent = "Game ID : "+res.game
+    if (res.game == this.GAMEID){
       
-      if (Object.keys(res.game_data).length <= 2){
-        
+      if (res.socket == this.SOCKETID || this.SOCKETID == null || Object.keys((res.game_data)).length === 2){
     
-          let table_div = document.getElementById("player_table")!;
-          table_div.removeChild(table_div.childNodes[0])
-    
-          let table = document.createElement("table"),
-              tr = document.createElement("tr"),
-              td_0 = document.createElement("td"),
-              td_1 = document.createElement("td"),
-              td_2 = document.createElement("td"),
-              text_0 = document.createTextNode("Player Side"),
-              text_1 = document.createTextNode("Socket ID"),
-              text_2 = document.createTextNode("Ready")
-    
-          td_0.appendChild(text_0);
-          td_1.appendChild(text_1);
-          td_2.appendChild(text_2);
-    
-          tr.appendChild(td_0);
-          tr.appendChild(td_1);
-          tr.appendChild(td_2);
-          table.appendChild(tr);
-    
-    
-          let count = 0;
-    
-          for (const [key, value] of Object.entries(res.game_data)) {
-            if (this.USERS[0] != key)
-                this.USERS.push(key)
-          }
+        trying_count[0]++
+      
+        document.getElementById("player_wait_banner")!.textContent! =  "Waiting for players (Session will be terminated in 60 seconds) (" + trying_count + "/60)"
+      
+        if (trying_count[0]>60){
+          trying_count[0] = 0
+          document.getElementById("player_wait_banner")!.textContent! =  ""
           
-          for (let i = 0; i < this.USERS.length; i++) {
-              let tr = document.createElement("tr"),
-    
+          Observable.toSocketIO(socket,"stop_searching_for_players",this.GAMEID)
+          // socket.emit("stop_searching_for_players",this.GAMEID)
+      
+          this.GAMEID = null
+          this.SOCKETID = null
+
+          //switch to singleplayer mode
+          Multiplayer.switchToSP()
+          alert("Timed Out. Please try again.")
+        }
+        
+        if (Object.keys(res.game_data).length <= 2){
+          
+      
+            let table_div = document.getElementById("player_table")!;
+            table_div.removeChild(table_div.childNodes[0])
+      
+            let table = document.createElement("table"),
+                tr = document.createElement("tr"),
                 td_0 = document.createElement("td"),
                 td_1 = document.createElement("td"),
                 td_2 = document.createElement("td"),
-            
-                side = document.createTextNode((count === 0)?"Left Side":"Right Side"),
-                text_1 = document.createTextNode(this.USERS[i]),
-                tick = document.createElement("img")
-    
-            tick.setAttribute("height","80px")
-            tick.setAttribute("weight","1000px")
-            tick.setAttribute("src","img/tick.png")
-    
-            td_0.appendChild(side);
+                text_0 = document.createTextNode("Player Side"),
+                text_1 = document.createTextNode("Socket ID"),
+                text_2 = document.createTextNode("Ready")
+      
+            td_0.appendChild(text_0);
             td_1.appendChild(text_1);
-            td_2.appendChild(tick);
-    
+            td_2.appendChild(text_2);
+      
             tr.appendChild(td_0);
             tr.appendChild(td_1);
             tr.appendChild(td_2);
-    
             table.appendChild(tr);
-            count++
-              
-          }
-          
-    
-          
-          table_div.appendChild(table)
-    
-          if ((Object.keys(res.game_data).length === 2)){
-            document.getElementById("loader")!.style.display = "none"
-          document.getElementById("player_wait_banner")!.style.display = "block"
-          document.getElementById("player_wait_banner")!.textContent = "Both Players Connected. To Start the Game, the Host has to click on the table."
-          
-          this.startMultiplayerGame()
-          
-          if (!socket.sentMydata) {
       
-            socket.emit("stop_searching_for_players")
-            socket.sentMydata = true;
+      
+            let count = 0;
+      
+            for (const [key, value] of Object.entries(res.game_data)) {
+              if (this.USERS[0] != key)
+                  this.USERS.push(key)
+            }
+            
+            for (let i = 0; i <= 1; i++) {
+                let tr = document.createElement("tr"),
+      
+                  td_0 = document.createElement("td"),
+                  td_1 = document.createElement("td"),
+                  td_2 = document.createElement("td"),
+              
+                  text_1:Text|undefined = undefined,
+                  tick:HTMLImageElement|undefined = undefined,
+
+                  side = document.createTextNode((count === 0)?"Left Side":"Right Side"),
+                
+                  if (this.USERS[i] !== undefined){
+                    text_1 = document.createTextNode(this.USERS[i])
+                    tick = document.createElement("img")
+
+                    tick.setAttribute("src","img/tick.png")
+                  }else{
+                    text_1 = document.createTextNode("Waitng...")
+                    tick = document.createElement("img")
+
+                    tick.setAttribute("src","img/tick.png")
+                  }
+                  
+      
+              tick!.setAttribute("height","80px")
+              tick!.setAttribute("weight","1000px")
+              
+      
+              td_0.appendChild(side);
+              td_1.appendChild(text_1!);
+              td_2.appendChild(tick!);
+      
+              tr.appendChild(td_0);
+              tr.appendChild(td_1);
+              tr.appendChild(td_2);
+      
+              table.appendChild(tr);
+              count++
+                
+            }
+            
+      
+            
+            table_div.appendChild(table)
+      
+            
+
+            if ((Object.keys(res.game_data).length === 2)){
+              document.getElementById("loader")!.style.display = "none"
+            document.getElementById("player_wait_banner")!.style.display = "block"
+            document.getElementById("player_wait_banner")!.textContent = "Both Players Connected. To Start the Game, the Host has to click on the table."
+            
+            this.startMultiplayerGame()
+            
+            if (!socket.sentMydata) {
+        
+              // socket.emit("stop_searching_for_players")
+              Observable.toSocketIO(socket,"stop_searching_for_players")
+              socket.sentMydata = true;
+            }
           }
+            
         }
-          
       }
     }
   }
@@ -948,10 +1046,10 @@ private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
 private updatePaddles(res:any,pongTable:PongTable) {
 
   let left_paddle = SessionData.session_data.current_paddle!
-  left_paddle.attr("y", res[this.GAMEID!][this.USERS[0]])
+  // left_paddle.attr("y", res[this.GAMEID!][this.USERS[0]])
 
   let right_paddle = SessionData.session_data.opponent_paddle!
-  right_paddle.attr("y", res[this.GAMEID!][this.USERS[1]])
+  // right_paddle.attr("y", res[this.GAMEID!][this.USERS[1]])
 
   
   pongTable.paddle_movement(left_paddle)(res[this.GAMEID!][this.USERS[0]])
@@ -974,6 +1072,8 @@ private updatePlayerHost(res:any,allocated:Array<boolean>) {
       allocated[0] = true       
       this.GAMEID = res.gameid
       this.SOCKETID = res.socket_id
+      console.log("ha")
+      console.log(res.gameid)
       document.getElementById("gameid")!.textContent = "Game ID : "+ res.gameid
       document.getElementById("player_wait_banner")!.style.display = "block"    
     }
@@ -1003,29 +1103,41 @@ private updatePlayerClient(res:any) {
 
 static switchToSP = () => {
 
-      document.getElementById("lobby")!.style.display = "none"
-      document.getElementById("game")!.style.display = "block"
-      document.getElementById("options")!.style.display = "block"
-      document.getElementById("singleplayer")!.style.display = "none"
-      document.getElementById("multiplayer")!.style.display = "block"
+      
+      io().emit("detach","check")
 
-      window.location.reload()
+      // document.getElementById("lobby")!.style.display = "none"
+      // document.getElementById("game")!.style.display = "block"
+      // document.getElementById("options")!.style.display = "block"
+      // document.getElementById("singleplayer")!.style.display = "none"
+      // document.getElementById("multiplayer")!.style.display = "block"
+      // console.log("ran")
+
+      const refresh = () => {window.location.reload()}
+
+      setTimeout(refresh,500)
+      
 }
 
 
 createGame= () => {
 
+  
   const generateGameId = () => {
     const socket = io(),
           _this=this
 
-    socket.emit('new_game');
+    Observable.toSocketIO(socket,"new_game")
+    // socket.emit('new_game');
 
     let allocated:Array<boolean> = []
     allocated[0] = false
-    socket.on('game_id',function(res:any){
-      _this.updatePlayerHost(res,allocated)}
-    );
+    Observable.fromSocketIO(socket,document,"game_id").subscribe((res)=>(_this.updatePlayerHost(res,allocated)))
+
+    // socket.on('game_id',function(res:any){
+    //   console.log("res")
+    //   _this.updatePlayerHost(res,allocated)}
+    // );
 
   }
 
@@ -1047,10 +1159,15 @@ joinGame = () => {
       const socket = io(),
           _this = this
 
-      socket.emit('join_game',game_id.toString());
-      socket.on('join', function(res:any){
-        _this.updatePlayerClient(res)}
-      );
+      // socket.emit('join_game',);
+
+      Observable.toSocketIO(socket,"join_game",game_id.toString())
+      
+      Observable.fromSocketIO(socket,document,"join").subscribe((res)=>(_this.updatePlayerClient(res)))
+      // socket.on('join', function(res:any){
+      //   _this.updatePlayerClient(res)}
+      // );
+
     }
 
 
