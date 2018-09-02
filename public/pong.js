@@ -299,7 +299,8 @@ function pong() {
                     document.getElementById("padding").value = Settings.settings.padding.toString();
             };
             this.update = () => {
-                let svg = document.getElementById("canvas"), updategame = () => {
+                let svg = document.getElementById("canvas");
+                const updategame = () => {
                     let pongTable = new PongTable(HTMLPage.svg);
                     pongTable.move_paddle(SessionData.session_data.current_paddle);
                 };
@@ -322,7 +323,10 @@ function pong() {
                         undefined;
             };
             this.start_game = () => {
-                SessionData.session_data.gameplay_main ? (SessionData.session_data.gameplay_main(), SessionData.session_data.end_ball_movement(), SessionData.session_data.end_cpu_paddle_movement()) : undefined;
+                SessionData.session_data.gameplay_main ?
+                    (SessionData.session_data.gameplay_main(), SessionData.session_data.end_ball_movement(), SessionData.session_data.end_cpu_paddle_movement())
+                    :
+                        undefined;
                 SessionData.game_data.score_left = 0;
                 SessionData.game_data.score_right = 0;
                 SessionData.game_data.round_started = false;
