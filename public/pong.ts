@@ -501,56 +501,88 @@ class Gameplay {
    * Method that contain the gameplay logic 
    */
   gameplay = () =>{
+    // Using the mouse up event to start an observable
     const 
     mouseup = Observable.fromEvent<MouseEvent>(HTMLPage.svg, 'mouseup')
+    // Check if the Multiplayer game is running
     .filter(s=>!Multiplayer.MULTIPLAYER_STATUS)
+    // Check if the previous round has ended
     .filter((s=>!this.game_data.round_started))
+    // If all the above conditions past then, start the round
     .subscribe(s=>this.startRound())
 
-    
+    // Creating an observable that fires every game (Userdefined framerate) milliseconds
     this.session_data.gameplay_main = Observable.interval(Settings.settings.game_speed)
+    // Using the current ball reference stored in the class attribute, we get the x axis values for the ball
     .map(s=>({x:this.session_data.current_ball!.getBall().attr('cx')}))
+    // Calling the subscribe function to check whether the ball is in bounds are if not calculating the points
     .subscribe(
-      ({x})=>{if (Number(x) < (Number(HTMLPage.svg.getAttribute("x"))-Number(this.session_data.current_ball!.getBall().attr("r")))) {
-        GameSound.game_sound.fail.play()
-        this.game_data.score_right+=1
+      ({x})=>{
+        // Checking if the x value of the ball is less than the left bound
+        if (Number(x) < (Number(HTMLPage.svg.getAttribute("x"))-Number(this.session_data.current_ball!.getBall().attr("r")))) {
+                // Play the sound for the ball going out of bounds 
+                GameSound.game_sound.fail.play()
+                // Increase the score of the right side player by one
+                this.game_data.score_right+=1
+                // Update the GUI score
                 document.getElementById("score2")!.textContent = (this.game_data.score_right).toString()
+                // End the ball movement observable
                 this.session_data.end_ball_movement()
+                // End the AI Paddle movement
                 this.session_data.end_cpu_paddle_movement()
-                this.session_data.current_ball!.getBall().attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-                .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
+                // Generating the random value to be used as the starting position for the next round
+                this.session_data.current_ball!.getBall()
+                  .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                  .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
+                // Setting the flag to start the next round as false
                 this.game_data.round_started = false
+                // Changing the direction of the ball so that it moves towards the left player
                 this.game_data.start_direction = -1
+                // Update the GUI Element to indicate which side is serving
                 this.htmlPage!.getGameBanner().textContent = "Right is Serving"
 
-              }else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(this.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))){
+        }else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(this.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))){
+                // Play the sound for the ball going out of bounds 
                 GameSound.game_sound.fail.play()
+                // Increase the score of the left side player by one
                 this.game_data.score_left +=1
+                // Update the GUI score
                 document.getElementById("score1")!.textContent = (this.game_data.score_left).toString()
+                // End the ball movement observable
                 this.session_data.end_ball_movement()
+                // End the AI Paddle movement
                 this.session_data.end_cpu_paddle_movement()
-                this.session_data.current_ball!.getBall().attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-                .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
+                // Generating the random value to be used as the starting position for the next round
+                this.session_data.current_ball!.getBall()
+                  .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                  .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
+                // Setting the flag to start the next round as false
                 this.game_data.round_started = false
+                // Changing the direction of the ball so that it moves towards the right player
                 this.game_data.start_direction = 1
+                // Update the GUI Element to indicate which side is serving
                 this.htmlPage!.getGameBanner().textContent = "Left is Serving"
       }
+      // Checking after increasing score whether any player has reached the game point
       if (this.game_data.score_left >= Settings.settings.game_point || this.game_data.score_right >= Settings.settings.game_point){
-        
-        GameSound.game_sound.fail.play()
+        // Calling the unsubscribe function for the main gameplay
         this.session_data.gameplay_main()
-              mouseup()
-              this.session_data.end_ball_movement()
-              this.session_data.end_cpu_paddle_movement()
-              
-              this.session_data.current_ball!.getBall().attr("r",0)
-              this.htmlPage!.getPlayerTurn().textContent = "Wanna play again?"
-              this.game_data.score_left>this.game_data.score_right?this.htmlPage!.getGameBanner().textContent = "Left Won the Game":this.htmlPage!.getGameBanner().textContent = "Right Won the Game"
-              document.getElementById("start")!.textContent = "Play Again"
-              this.game_data.round_started = true
-              
-              
-
+        // Ending the mouse up observable so that it wont start a new game
+        mouseup()
+        // Calling the unsubscribe function to end the ball movement
+        this.session_data.end_ball_movement()
+        // Calling the unsubscribe function to end the cpu paddle movement
+        this.session_data.end_cpu_paddle_movement()
+        // Setting the radius of the ball to 0 to hide the ball
+        this.session_data.current_ball!.getBall().attr("r",0)
+        // Updating the GUI to ask the user to play again
+        this.htmlPage!.getPlayerTurn().textContent = "Wanna play again?"
+        // Check which player won and update the GUI accordingly 
+        this.game_data.score_left>this.game_data.score_right?this.htmlPage!.getGameBanner().textContent = "Left Won the Game":this.htmlPage!.getGameBanner().textContent = "Right Won the Game"
+        // Update the GUI button to display paly again
+        document.getElementById("start")!.textContent = "Play Again"
+        // Set the flag to true to stop the game from starting
+        this.game_data.round_started = true
       }
       
       })
@@ -558,43 +590,59 @@ class Gameplay {
   }
 
 }
-
+/**
+ * The class used to store the data needed for the HTML Page
+ */
 class HTMLPage {
 
-  private game_banner = document.getElementById("game_state_banner")!
-  private player_turn = document.getElementById("player_turn")!
-  private start_button = document.getElementById("start")!
-  static svg:HTMLElement = document.getElementById("canvas")!;
-  private gamePlay:Gameplay;
+  private game_banner = document.getElementById("game_state_banner")!       // Setting the reference to the game_state_banner html element
+  private player_turn = document.getElementById("player_turn")!             // Setting the reference to the player_turn html element
+  private start_button = document.getElementById("start")!                  // Setting the reference to the start html element
+  static svg:HTMLElement = document.getElementById("canvas")!;              // Setting the static reference to the canvas html element
+  private gamePlay:Gameplay;                                                // Storing a reference to the gameplay class that run the game
 
+  /**
+   * Constructor to initialize the class
+   * @param gameplay Reference to the gameplay 
+   */
   constructor(gameplay:Gameplay){
-
+    // Setting the gameplay parameter as the private attribute
     this.gamePlay = gameplay
+    // Setting passing the reference to the itself as the parameter for the Gameplay class
     this.gamePlay.setHTMLPage(this)
 
+    // Getting reference to the start button and storing it in a private attribute of the class
     this.start_button = document.getElementById("start")!
+    // Getting reference to the game_start element and storing it in a private attribute of the class
     this.game_banner = document.getElementById("game_state_banner")!
+    // Getting reference to the player turn element and storing it in a private attribute of the class
     this.player_turn = document.getElementById("player_turn")!
-
+    // Setting the style of the button as block
     this.start_button.style.display = "block"
-
+    // Running the init function of the class to initalize all the values to default
     this.init()
 
+    // Setting the onclick of the start button
     document.getElementById("start")!.onclick = this.start_game
+    // Setting the onclick of the update button
     document.getElementById("update")!.onclick = this.update
-
+    // Setting the onclick of the ultiplayer switchToSP button
     document.getElementById("singleplayer_button")!.onclick = Multiplayer.switchToSP
-    
+    // Load all the audio files needed for the game
     this.loadSound()
 
     
 
   }
 
+  /**
+   * This function is used to intilize the defalut values of the options table to the defalut values of the game
+   */
   init = ():void => {
 
+    // Checking the correct radio button
     Settings.settings.player_side === "left"?(<HTMLInputElement>document.getElementById("left_side"))!.checked = true: (<HTMLInputElement>document.getElementById("right_side"))!.checked = true,
-
+    // Assigning the default values for the options text boxes
     (<HTMLInputElement>document.getElementById("theight"))!.value = Settings.settings.table_height.toString(),
     (<HTMLInputElement>document.getElementById("twidth"))!.value = Settings.settings.table_width.toString(),
     (<HTMLInputElement>document.getElementById("ball_speed"))!.value = Settings.settings.ball_speed.toString(),
@@ -606,8 +654,14 @@ class HTMLPage {
 
   }
 
+  /**
+   * Staic class used to delete all the elements in the svg element(i.e canvas)
+   * @param svg Reference to the svg element
+   */
   static clearAllChildren = (svg:HTMLElement) => {
+    // Count of all the child svg elemnents
     let count = svg.childElementCount!
+    // Loop through all the items to delete them one by one
     while (count>0){
       svg.removeChild(svg.firstChild!)
       count--
