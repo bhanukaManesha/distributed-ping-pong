@@ -658,7 +658,7 @@ class HTMLPage {
    * Staic class used to delete all the elements in the svg element(i.e canvas)
    * @param svg Reference to the svg element
    */
-  static clearAllChildren = (svg:HTMLElement) => {
+  static clearAllChildren = (svg:HTMLElement):void => {
     // Count of all the child svg elemnents
     let count = svg.childElementCount!
     // Loop through all the items to delete them one by one
@@ -668,17 +668,23 @@ class HTMLPage {
     }
   }
 
-
-  update = () => {
+  /**
+   * Function used to update the settings in the game
+   */
+  update = ():void => {
+    // Getting a reference to the svg 
     let svg = document.getElementById("canvas")!,
     
-    updategame = () => {
+    // Function to update the game and restart it 
+    const updategame = () => {
       let pongTable = new PongTable(HTMLPage.svg)
       pongTable.move_paddle(SessionData.session_data.current_paddle!)
     }
+
+    //  Prompting the user to confirm to update the settings
     confirm("THE GAME IS STILL IN BETA. If you wish to update the settings, do at your own RISK. The game may crash on some combinations. If it crashes you will have to reload the page.  Do you wish to continue? ")?
     (
-
+    // Retriving the data from the options table and setting them as the data for the static class
     (<HTMLInputElement>document.getElementById("left_side"))!.checked?
     Settings.settings.player_side ="left":Settings.settings.player_side ="right",
     Settings.settings.table_height = Number((<HTMLInputElement>document.getElementById("theight"))!.value),
@@ -689,56 +695,79 @@ class HTMLPage {
     Settings.settings.paddle_height = Number((<HTMLInputElement>document.getElementById("paddle_height"))!.value),
     Settings.settings.dash_gap = Number((<HTMLInputElement>document.getElementById("dash_gap"))!.value),
     Settings.settings.padding = Number((<HTMLInputElement>document.getElementById("padding"))!.value),
+    
+    // Clearing all the values from the svg 
     HTMLPage.clearAllChildren(svg),
     
+    // Updating the height of the canvas
     document.getElementById("canvas")!.setAttribute("height", Settings.settings.table_height.toString()),
+    // Updating the width of the canvas
     document.getElementById("canvas")!.setAttribute("width",Settings.settings.table_width.toString()),
+    // Updating the whole game accrodingly
     updategame())
     :
+    // If user says no, then rivert all the changes back
     undefined
 
   }
 
-  start_game = () => {
+  /**
+   * Function used to start the game
+   */
+  start_game = ():void => {
 
-    SessionData.session_data.gameplay_main?(SessionData.session_data.gameplay_main(),SessionData.session_data.end_ball_movement(),SessionData.session_data.end_cpu_paddle_movement()):undefined
+    // Check if the gameplay_main observable is defined
+    SessionData.session_data.gameplay_main?
+    // If yes then unsubscribe current instances of the gamplay_main, AI movement and ball movement
+    (SessionData.session_data.gameplay_main(),SessionData.session_data.end_ball_movement(),SessionData.session_data.end_cpu_paddle_movement())
+    :
+    // Else undefined
+    undefined
 
-
+    // Setting the game data to the defalut values
     SessionData.game_data.score_left = 0
     SessionData.game_data.score_right = 0
     SessionData.game_data.round_started = false
     SessionData.game_data.start_direction = 1
 
-    
+    // Clear all the children elements of the svg
     HTMLPage.clearAllChildren(HTMLPage.svg)
 
-    // starting the game
+    // Initializing the pong table
     let pongTable = new PongTable(HTMLPage.svg)
-    
-
+    // Start moving the user paddle
     pongTable.move_paddle(SessionData.session_data.current_paddle!)
-
     // Starting the game play
     this.gamePlay.gameplay()
 
+    // Update the GUI to display that the game has started
     this.player_turn.textContent = "Game Started"
     this.game_banner.textContent = "Left is Serving"
+    // Update the Start button to display the restart game
     document.getElementById("start")!.textContent = "Restart Game"
     
   }
-
-  loadSound = () => {
+  /**
+   * Function used to load the sounds into the game
+   */
+  loadSound = ():void => {
+    // Check if the sound is not already loaded
     if (GameSound.game_sound.collision.src !== undefined || GameSound.game_sound.fail.src !== undefined ){
+      // If not loaded, then update the src values of the audio elements
       GameSound.game_sound.collision!.src = "sound/knock.wav"
       GameSound.game_sound.fail!.src = "sound/fail.wav"
     }
-
   }
 
-  getGameBanner = () => {
-      return this.game_banner
+  /**
+   * Accesor for the game_banner element
+   */
+  getGameBanner = ():HTMLElement => {
+    // Returns the reference to the HTML game banner element
+    return this.game_banner
   }
-  getPlayerTurn = () => {
+  getPlayerTurn = ():HTMLElement => {
+    // Returns the reference to the HTML player turn elemnent
     return this.player_turn
 }
 
@@ -750,9 +779,6 @@ class HTMLPage {
 // ******************************************************************************************************************************************************************************************************  //
 // ******************************************************************************************************************************************************************************************************  //
 // ******************************************************************************************************************************************************************************************************  //
-
-
-
 
 
 
