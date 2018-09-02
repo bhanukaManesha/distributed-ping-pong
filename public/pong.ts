@@ -299,7 +299,6 @@ class Ball {
                                 && Number(y_cord) + Number(this.ball.attr("r")) > Number(paddle.attr("y")) 
                                 && Number(y_cord) < Number(paddle.attr("y"))+Number(paddle.attr("height")) + Number(this.ball.attr("r")))
             }
-
             /**
              * This fucntion is used if there is a paddle collision, to calculate where the ball is colliding with the paddle and to take the appropirate direction change accordingly
              */
@@ -331,14 +330,12 @@ class Ball {
                                 return (x_change = (-x_change),y_change = gradients[Math.floor((Math.random() * 3))],{x:x_cord,y:y_cord})
                               }
             }
-
             // Check whether there's paddle collison if so return the changed direction cordinates or just return the coordinates
           return paddle_collison() ? 
                 (direction_change())
                 :
                   {x:x_cord,y:y_cord}
           }
-        
         // Ball movement is based on a Observable sending data every millisecond decided by the user
         return Observable.interval(Settings.settings.game_speed)
         .map(s=>(
@@ -384,10 +381,6 @@ class Ball {
           this.ball.attr('cx', x),
           this.ball.attr('cy', y))
       );
-
-
-
-
     }
 }
 
@@ -438,9 +431,10 @@ class CPUPaddleMovement{
           // Getting the y axis of the ball and mapping it to an object {y}
           .map(s=>(
             {y:SessionData.session_data.current_ball!.getBall().attr('cy') }))
-          // Filtering the values less 
-          // .filter((y) => !(Number(y) <= (Number(HTMLPage.svg.getAttribute("height"))) - (Number(this.paddle!.attr("height"))/2) - Settings.settings.padding) && !(Number(y) >= Settings.settings.padding))  
-          // Getting the paddle increment to change the locatiomn of the paddle
+          // Filtering the values that are greater than the limits of the canvas area in order to prevent the AI from 
+          // going out of bounds
+          .filter((y) => !(Number(y) <= (Number(HTMLPage.svg.getAttribute("height"))) - (Number(this.paddle!.attr("height"))/2) - Settings.settings.padding) && !(Number(y) >= Settings.settings.padding))  
+          // Getting the paddle increment to change the location of the paddle
           .map(({y})=>(
             {y:increment(Number(y))}))
           // Changing the y axis of the paddle
@@ -458,39 +452,60 @@ class CPUPaddleMovement{
     }
 }
 
+
+/**
+ * This class is used to intialize the gameplay and control the flow of the game
+ */
 class Gameplay {
 
-  private htmlPage:HTMLPage|undefined;
-  private session_data:any;
-  private game_data:any;
+  private htmlPage:HTMLPage|undefined;               // This variable is used to store a reference to the html page, it can be either of type HTMLPage or undefined
+  private session_data:any;                          // This variable is used to store a refernce to the session_data
+  private game_data:any;                             // This variable is used to store a reference to the game data
 
+  // Contructor to initialize the gameplay class
   constructor(){
+    // Initializing the gameplay attribute to undefined
     this.htmlPage = undefined
+    // Initializng the session_data to to the reference of the Static Class Attribute
     this.session_data = SessionData.session_data
+    // Initializng the game_data to the reference of the Static Class Attribute
     this.game_data = SessionData.game_data
   }
 
+  /**
+   * This method is used to start a round of game play. (i.e round is from one point to another)
+   */
   private startRound(){
+    // Setting the flag to true to indicate that a round has started
     this.game_data.round_started = true
-    
+    // Passing in the initial start_direction for each round for the ball and starting the ball movement observable and 
+    // and get the reference to the unsubscribe function and store it in the session data
     this.session_data.end_ball_movement= this.session_data.current_ball.ball_movement(this.game_data.start_direction)
-    
+    // Creating a new CPUPaddleMovement class to initilize the AI Paddle
     let cpu = new CPUPaddleMovement(this.session_data.opponent_paddle!)
+    // Calling the getCPUPaddleMovement method in the gameplay class to start moving the paddle and get the reference to
+    // the unsubscribe function and store it in the session data
     this.session_data.end_cpu_paddle_movement = cpu.getCPUPaddleMovement()()
 
   }
-  
+  /**
+   * Mutator for setting the html page
+   * @param html the reference to the html page
+   */
   setHTMLPage = (html:HTMLPage) => {
+    // Setting the passed in html reference as the attribute of the class
     this.htmlPage = html
   }
 
-  gameplay = <T>() =>{
+  /**
+   * Method that contain the gameplay logic 
+   */
+  gameplay = () =>{
     const 
     mouseup = Observable.fromEvent<MouseEvent>(HTMLPage.svg, 'mouseup')
     .filter(s=>!Multiplayer.MULTIPLAYER_STATUS)
     .filter((s=>!this.game_data.round_started))
     .subscribe(s=>this.startRound())
-
 
     
     this.session_data.gameplay_main = Observable.interval(Settings.settings.game_speed)
@@ -576,7 +591,7 @@ class HTMLPage {
 
   }
 
-  init = () => {
+  init = ():void => {
 
     Settings.settings.player_side === "left"?(<HTMLInputElement>document.getElementById("left_side"))!.checked = true: (<HTMLInputElement>document.getElementById("right_side"))!.checked = true,
 

@@ -209,6 +209,7 @@ function pong() {
                 };
                 return Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ y: SessionData.session_data.current_ball.getBall().attr('cy') }))
+                    .filter((y) => !(Number(y) <= (Number(HTMLPage.svg.getAttribute("height"))) - (Number(this.paddle.attr("height")) / 2) - Settings.settings.padding) && !(Number(y) >= Settings.settings.padding))
                     .map(({ y }) => ({ y: increment(Number(y)) }))
                     .subscribe(({ y }) => (this.paddle.attr("y", y.toString())));
             };
