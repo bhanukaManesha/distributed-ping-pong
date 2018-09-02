@@ -238,7 +238,8 @@ function pong() {
                         document.getElementById("score2").textContent = (this.game_data.score_right).toString();
                         this.session_data.end_ball_movement();
                         this.session_data.end_cpu_paddle_movement();
-                        this.session_data.current_ball.getBall().attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                        this.session_data.current_ball.getBall()
+                            .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
                             .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
                         this.game_data.round_started = false;
                         this.game_data.start_direction = -1;
@@ -250,14 +251,14 @@ function pong() {
                         document.getElementById("score1").textContent = (this.game_data.score_left).toString();
                         this.session_data.end_ball_movement();
                         this.session_data.end_cpu_paddle_movement();
-                        this.session_data.current_ball.getBall().attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                        this.session_data.current_ball.getBall()
+                            .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
                             .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
                         this.game_data.round_started = false;
                         this.game_data.start_direction = 1;
                         this.htmlPage.getGameBanner().textContent = "Left is Serving";
                     }
                     if (this.game_data.score_left >= Settings.settings.game_point || this.game_data.score_right >= Settings.settings.game_point) {
-                        GameSound.game_sound.fail.play();
                         this.session_data.gameplay_main();
                         mouseup();
                         this.session_data.end_ball_movement();
