@@ -541,6 +541,7 @@ class Gameplay {
                 // Update the GUI Element to indicate which side is serving
                 this.htmlPage!.getGameBanner().textContent = "Right is Serving"
 
+        // Checking if the x value of the ball is greater than the right bound
         }else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(this.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))){
                 // Play the sound for the ball going out of bounds 
                 GameSound.game_sound.fail.play()
@@ -968,59 +969,101 @@ class Multiplayer {
             // Update the y axis
             .attr("cy",data.y)
     }
-
   }
 
-  private updateScore = (res:any) => {
-    
+  /**
+   * Function to update the scores and end the client side game
+   * @param res response from the server with the updated scores
+   */
+  private updateScore = (res:any):void => {
+
+    const socket = io()             // Reference to the io() function
+
+    // Check whether the GameID is the current Session Game ID
     if (res.game_id == this.GAMEID) {
-      
-     
+      // Upadting the client left score
       SessionData.game_data.score_left = res.score_1
+      // Updating the client right score
       SessionData.game_data.score_right = res.score_2
+      // Updating the playerturn banner with the message from the server
       this.html_page.getPlayerTurn().textContent =res.message
 
+      // Updating the left UI score
       document.getElementById("score1")!.textContent = (SessionData.game_data.score_left).toString()
+      // Updaing the right UI score
       document.getElementById("score2")!.textContent = (SessionData.game_data.score_right).toString()
 
+      // Checking the response status
       if (res.status == 1){
+        // if the response status is 1, the game is over
+        // Showing the loader until the server detach from the game
         document.getElementById("loader2")!.style.display = "block"
+        // Hiding the switch to single player button until the server detaches
         document.getElementById("singleplayer_button")!.style.display = "none"
+        // Printing who won the game
         SessionData.game_data.score_left>SessionData.game_data.score_right?this.html_page.getGameBanner().textContent = "Left Won the Game":this.html_page.getGameBanner().textContent = "Right Won the Game"
+        // Setting the round started value to true
         SessionData.game_data.round_started = true
-        io().emit("detach",this.GAMEID)
+        // Sending the detach request to the server
+        Observable.toSocketIO(socket,"detach",this.GAMEID)
+        // io().emit("detach",this.GAMEID)
+        // Create a function to refresh the page
         const refresh = () => {window.location.reload()}
+        // Waiting 5 seconds and then refreshing the page
         setTimeout(refresh,5000)
 
       }
     }
   }
 
-  private host_gameplay = <T>() =>{
-  
+  /**
+   * Function running in the host send data to the server
+   */
+  private host_gameplay = ():void =>{
+    const socket = io()             // Reference to the io() function
+
+    // Creating mouse up with a function that returns void
     let mouseup:() => void = () => null
-        mouseup = Observable.fromEvent<MouseEvent>(HTMLPage.svg, 'mouseup')
-        .filter((s=>!SessionData.game_data.round_started))
-        .subscribe(s=>(SessionData.game_data.round_started = true, SessionData.session_data.end_ball_movement= SessionData.session_data.current_ball!.ball_movement(SessionData.game_data.start_direction)))
     
-  
+    // Assigning a mouseup event to create an observable
+    mouseup = Observable.fromEvent<MouseEvent>(HTMLPage.svg, 'mouseup')
+        // Checking if the round has not started
+        .filter((s=>!SessionData.game_data.round_started))
+        // Subscribe to the observable
+        .subscribe(s=>(
+          // Change the round started to true
+          SessionData.game_data.round_started = true,
+          // Start the ball movement
+          SessionData.session_data.end_ball_movement= SessionData.session_data.current_ball!.ball_movement(SessionData.game_data.start_direction)))
+    
+    // Creating an observable to notify every 10 milliseconds
     SessionData.session_data.gameplay_main = Observable.interval(10)
+    // Get the current ball x axis
     .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
+    // Subscribe to the observable to update the scores
     .subscribe(
       ({x})=>{
-      
+        // Checking if the x value of the ball is less than the left bound
         if (Number(x) < (Number(HTMLPage.svg.getAttribute("x"))-Number(SessionData.session_data.current_ball!.getBall().attr("r")))) {
-                
+                // Play the sound for the ball going out of bounds 
                 GameSound.game_sound.fail.play()
+                // Increase the score of the right side player by one
                 SessionData.game_data.score_right+=1
+                // Update the GUI score
                 document.getElementById("score2")!.textContent = (SessionData.game_data.score_right).toString()
+                // End the ball movement observable
                 SessionData.session_data.end_ball_movement()
+                // Setting the flag to start the next round as false
                 SessionData.game_data.round_started = false
+                // Changing the direction of the ball so that it moves towards the left player
                 SessionData.game_data.start_direction = -1
+                // Update the GUI Element to indicate which side is serving
                 this.html_page.getPlayerTurn().textContent = "Right is Serving"
-                SessionData.session_data.current_ball!.getBall().attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                // Generating the random value to be used as the starting position for the next round
+                SessionData.session_data.current_ball!.getBall()
+                .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
                 .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
-
+                // Creating an object to be sent to the server with all the socre data
                 let res = {
                   "status" : 0,
                   "game_id" : this.GAMEID,
@@ -1028,21 +1071,31 @@ class Multiplayer {
                   "score_2" : SessionData.game_data.score_right,
                   "message" : "Right is Serving"
                 }
-                io().emit("score_update",res)
+                // Sending the data to the server
+                Observable.toSocketIO(socket,"score_update",res)
+                // io().emit("score_update",res)
   
-                
+              // Checking if the x value of the ball is greater than the right bound
               }else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(SessionData.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))){
-                
+                // Play the sound for the ball going out of bounds 
                 GameSound.game_sound.fail.play()
+                // Increase the score of the left side player by one
                 SessionData.game_data.score_left +=1
+                // Update the GUI score
                 document.getElementById("score1")!.textContent = (SessionData.game_data.score_left).toString()
+                // End the ball movement observable
                 SessionData.session_data.end_ball_movement()
+                // Setting the flag to start the next round as false
                 SessionData.game_data.round_started = false
+                // Changing the direction of the ball so that it moves towards the right player
                 SessionData.game_data.start_direction = 1
+                // Update the GUI Element to indicate which side is serving
                 this.html_page.getPlayerTurn().textContent = "Left is Serving"
-                SessionData.session_data.current_ball!.getBall().attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                // Generating the random value to be used as the starting position for the next round
+                SessionData.session_data.current_ball!.getBall()
+                .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
                 .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
-
+                // Creating an object to be sent to the server with all the score data
                 let res = {
                   "status" : 0,
                   "game_id" : this.GAMEID,
@@ -1050,26 +1103,31 @@ class Multiplayer {
                   "score_2" : SessionData.game_data.score_right,
                   "message" : "Left is Serving"
                 }
-                io().emit("score_update",res)
+                // Sending the data to the server
+                Observable.toSocketIO(socket,"score_update",res)
+                // io().emit("score_update",res)
       }
-      
+      // Checking after increasing score whether any player has reached the game point
       if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point){
-        
+              // Hiding the single player button
               document.getElementById("singleplayer_button")!.style.display = "none"
+              // Showing the loader until the host sends the data to the server
               document.getElementById("loader2")!.style.display = "block"
-              GameSound.game_sound.fail.play()
+              // Ending the mouse up observable so that it wont start a new game
               SessionData.session_data.gameplay_main()
-              if (this.SOCKETID === this.USERS[0]){
-                  mouseup()
-              }
+              // Ending the mouse up observable
+              mouseup()
+              // Calling the unsubscribe function to end the ball movement
               SessionData.session_data.end_ball_movement()
-              
+               // Setting the radius of the ball to 0 to hide the ball
               SessionData.session_data.current_ball!.getBall().attr("r",0)
+              // Updating the GUI to prompt the user to wait
               this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
+              // Check which player won and update the GUI accordingly 
               SessionData.game_data.score_left>SessionData.game_data.score_right?this.html_page.getGameBanner().textContent = "Left Won the Game":this.html_page.getGameBanner().textContent = "Right Won the Game"
-              // document.getElementById("player_turn")!.style.display = "none"
+              // Set the flag to true to stop the game from starting
               SessionData.game_data.round_started = true
-
+              // Creating an object to be sent to the server with all the score data  
               let res = {
                 "status" : 1,
                 "game_id" : this.GAMEID,
@@ -1077,144 +1135,178 @@ class Multiplayer {
                 "score_2" : SessionData.game_data.score_right,
                 "message" : "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
               }
-              io().emit("score_update",res)
 
-              io().emit("detach",this.GAMEID)
+              // Sending the data to the server
+              Observable.toSocketIO(socket,"score_update",res)
 
+              // Sending the detach signal to the server
+              Observable.toSocketIO(socket,"detach",this.GAMEID)
+
+              // io().emit("score_update",res)
+              // io().emit("detach",this.GAMEID)
+
+              // Create a function to refresh the page
               const refresh = () => {window.location.reload()}
+               // Waiting 5 seconds and then refreshing the page
               setTimeout(refresh,5000)
-             
-              
-              
-  
-      }
-    
 
-  
-  
-      
-      })
-    
+      }
+    })
   }
 
+/**
+ * 
+ * Function used to update the lobby table 
+ * @param res response from the server
+ * @param socket socket from which the server sends data
+ * @param trying_count trying count for the amount of times the server is sending data
+ */
 private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
+  // Check if the game_data is not undefined
   if (res.game_data !== undefined){
-    console.log("its hereee")
+    // Updating the GAMEID to the value from the server
     document.getElementById("gameid")!.textContent = "Game ID : "+res.game
+    // If the GameID is not equal to the one from the server
     if (res.game == this.GAMEID){
-      
+      // And if the Socket is equal to the socket ID or the length of items in the game_data is equal to 2
       if (res.socket == this.SOCKETID || this.SOCKETID == null || Object.keys((res.game_data)).length === 2){
-    
+        // Increase the trying count by 1
         trying_count[0]++
-      
+        // Upadting the UI to indicate that the server is serching for players
         document.getElementById("player_wait_banner")!.textContent! =  "Waiting for players (Session will be terminated in 60 seconds) (" + trying_count + "/60)"
-      
+        // Check if the trying count is less than 60 
         if (trying_count[0]>60){
+          // If less tahn 60, set it to 0 again
           trying_count[0] = 0
+          // Updating the please wait banner
           document.getElementById("player_wait_banner")!.textContent! =  ""
-          
+          // Sending the signal to the server to stop searching for players
           Observable.toSocketIO(socket,"stop_searching_for_players",this.GAMEID)
           // socket.emit("stop_searching_for_players",this.GAMEID)
-      
+          
+          // Setting the GAMEID as null
           this.GAMEID = null
+          // Setting the SOCKETID as null
           this.SOCKETID = null
 
-          //switch to singleplayer mode
+          //Switch to singleplayer mode
           Multiplayer.switchToSP()
+          // Notify the user that the server TIMED OUT
           alert("Timed Out. Please try again.")
         }
         
+        // Check if the length of the users in the server response is less than or equal to 2
         if (Object.keys(res.game_data).length <= 2){
-          
-      
+            // Getting reference to the player tabe div
             let table_div = document.getElementById("player_table")!;
+            // Remove all the nodes from the div
             table_div.removeChild(table_div.childNodes[0])
       
-            let table = document.createElement("table"),
-                tr = document.createElement("tr"),
-                td_0 = document.createElement("td"),
-                td_1 = document.createElement("td"),
-                td_2 = document.createElement("td"),
-                text_0 = document.createTextNode("Player Side"),
-                text_1 = document.createTextNode("Socket ID"),
-                text_2 = document.createTextNode("Ready")
+            let table = document.createElement("table"),                // Creating a new table
+                tr = document.createElement("tr"),                      // Creating a new table row
+                td_0 = document.createElement("td"),                    // Creating a new table data element
+                td_1 = document.createElement("td"),                    // Creating a new table data element
+                td_2 = document.createElement("td"),                    // Creating a new table data element
+                text_0 = document.createTextNode("Player Side"),        // Creating a new textNode and setting the value
+                text_1 = document.createTextNode("Socket ID"),          // Creating a new textNode and setting the value
+                text_2 = document.createTextNode("Ready")               // Creating a new textNode and setting the value
       
+            // Appending the textNodes to the table data elements
             td_0.appendChild(text_0);
             td_1.appendChild(text_1);
             td_2.appendChild(text_2);
       
+            // Appending the table data elements to the table rows
             tr.appendChild(td_0);
             tr.appendChild(td_1);
             tr.appendChild(td_2);
+
+            // Appending the table row to the table
             table.appendChild(tr);
       
-      
+            // Initialize a count varible to 0
             let count = 0;
       
+            // Using a for loop push the user data onto the USERS array
             for (const [key, value] of Object.entries(res.game_data)) {
+              // If the users key is not the same as the host key
               if (this.USERS[0] != key)
+                  // Push the key to the users table 
                   this.USERS.push(key)
             }
-            
+            // Using a loop that runs twice, create the users table row elements
             for (let i = 0; i <= 1; i++) {
+                // Create a new table row element
                 let tr = document.createElement("tr"),
-      
+                  // Create table data elements
                   td_0 = document.createElement("td"),
                   td_1 = document.createElement("td"),
                   td_2 = document.createElement("td"),
-              
+
+                  // Create the text element fro the table
                   text_1:Text|undefined = undefined,
+                  // Creating an HTMLImage element
                   tick:HTMLImageElement|undefined = undefined,
+                  // Checking the correct count and assigning the left and right side accordingly
+                  side = document.createTextNode((count === 0)?"Left Side":"Right Side")
 
-                  side = document.createTextNode((count === 0)?"Left Side":"Right Side"),
-                
+                  // Check if the USERS are defined
                   if (this.USERS[i] !== undefined){
+                    // If defined just print the socket id
                     text_1 = document.createTextNode(this.USERS[i])
+                    // Set the image element
                     tick = document.createElement("img")
-
+                    // Set the source to the tick
                     tick.setAttribute("src","img/tick.png")
                   }else{
-                    text_1 = document.createTextNode("Waitng...")
+                    // Setting the text node as waiting
+                    text_1 = document.createTextNode("Waiting......")
+                    // Creating an empty image tag
                     tick = document.createElement("img")
-
-                    tick.setAttribute("src","img/tick.png")
                   }
                   
-      
+              // Setting the height and width of the image tag
               tick!.setAttribute("height","80px")
               tick!.setAttribute("weight","1000px")
               
-      
+              // Appending the text and images to the table data element
               td_0.appendChild(side);
               td_1.appendChild(text_1!);
               td_2.appendChild(tick!);
       
+              // Appending the table data to the table row
               tr.appendChild(td_0);
               tr.appendChild(td_1);
               tr.appendChild(td_2);
       
+              // Appending the table row to the table
               table.appendChild(tr);
+              // Increasing the count by one
               count++
                 
             }
             
-      
-            
+            // Appending the tabe to the table div
             table_div.appendChild(table)
       
             
-
+            // Check if the length of the keys two
             if ((Object.keys(res.game_data).length === 2)){
+              // If true, hide the loader
               document.getElementById("loader")!.style.display = "none"
-            document.getElementById("player_wait_banner")!.style.display = "block"
-            document.getElementById("player_wait_banner")!.textContent = "Both Players Connected. To Start the Game, the Host has to click on the table."
+              // Display the pleasewait banner
+              document.getElementById("player_wait_banner")!.style.display = "block"
+              // Display that both players are ready
+              document.getElementById("player_wait_banner")!.textContent = "Both Players Connected. To Start the Game, the Host has to click on the table."
+              // Start the multiplayer game 
+              this.startMultiplayerGame()
             
-            this.startMultiplayerGame()
-            
+            // If the socket sent my data is false
             if (!socket.sentMydata) {
-        
               // socket.emit("stop_searching_for_players")
+              // Send the request to stop asking for the users
               Observable.toSocketIO(socket,"stop_searching_for_players")
+              // If sent then stop asking
               socket.sentMydata = true;
             }
           }
@@ -1223,107 +1315,121 @@ private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
       }
     }
   }
-  
-   
-    
-  
 }
 
+/**
+ * Function used to update the paddles of the clients
+ * @param res response from the server with the paddl values
+ * @param pongTable reference to the pong table
+ */
 private updatePaddles(res:any,pongTable:PongTable) {
-
+  // Getting reference to the left paddle
   let left_paddle = SessionData.session_data.current_paddle!
-  // left_paddle.attr("y", res[this.GAMEID!][this.USERS[0]])
-
+  // Getting reference to the right paddle
   let right_paddle = SessionData.session_data.opponent_paddle!
-  // right_paddle.attr("y", res[this.GAMEID!][this.USERS[1]])
 
-  
+  // Calling the paddle movement function to move the paddle of both the left and right players using the 
+  // data from the server
   pongTable.paddle_movement(left_paddle)(res[this.GAMEID!][this.USERS[0]])
   pongTable.paddle_movement(right_paddle)(res[this.GAMEID!][this.USERS[1]])
-
-
   
 }
-/**
- * 
- * 
- * 
- * 
- * 
- * */ 
-private updatePlayerHost(res:any,allocated:Array<boolean>) {
 
+/**
+ * Function used to update the host data for the game
+ * @param res response from the server with the important information for the host
+ * @param allocated flag to check whether the data is updated
+ */
+private updatePlayerHost(res:any,allocated:Array<boolean>) {
+  // Check the server response code
   if (res.code == 200){ 
+    // Check if the game is undefined or the Game id is equal to the server game id
     if (this.GAMEID == undefined || this.GAMEID == res.gameid){
-      allocated[0] = true       
+      // If true, then update the allocated value to true
+      allocated[0] = true  
+      // Update the game id of the host
       this.GAMEID = res.gameid
+      // Update the socketid of the host
       this.SOCKETID = res.socket_id
-      console.log("ha")
-      console.log(res.gameid)
+
+      // Update the UI to display the Game ID
       document.getElementById("gameid")!.textContent = "Game ID : "+ res.gameid
       document.getElementById("player_wait_banner")!.style.display = "block"    
     }
+  // Check if the response code id 404
   }else if (res.code == 404){
+    // If the game is not allocated
     if (allocated[0] == false){
+      // Switch to Single Player
       Multiplayer.switchToSP()
+      // Display alert message
       alert(res.message)
     }
   }
 }
 
+/**
+ * Function to update the client information
+ * @param res the response from the server
+ */
 private updatePlayerClient(res:any) {
+  // Check if the response code is 200
   if (res.code === 200) {
+    // Check if the game is undefined or the Game id is equal to the server game id
     if (this.GAMEID == undefined || this.GAMEID == res.gameid){
-    this.GAMEID = res.gameid
-    this.SOCKETID = res.socket_id
-    this.createLobby(res.gameid)
-    
-    document.getElementById("gameid")!.textContent = "Game ID : "+res.gameid
+      // Update the game id of the client
+      this.GAMEID = res.gameid
+      // Update the socket id of the client
+      this.SOCKETID = res.socket_id
+      // Create the lobby of the client
+      this.createLobby(res.gameid)
+      // Updating the Game ID of the client 
+      document.getElementById("gameid")!.textContent = "Game ID : "+res.gameid
     }
   }else{
+    // Dispaly message from server
     alert(res.message)
   }
 
 }
 
-
+/**
+ * Static class to switch from single player to multiplayer
+ */
 static switchToSP = () => {
+      const socket = io()             // Reference to the io() function
 
-      
-      io().emit("detach","check")
+      // Send the request to detach
+      Observable.toSocketIO(socket,"detach","check")
+      // io().emit("detach","check")
 
-      // document.getElementById("lobby")!.style.display = "none"
-      // document.getElementById("game")!.style.display = "block"
-      // document.getElementById("options")!.style.display = "block"
-      // document.getElementById("singleplayer")!.style.display = "none"
-      // document.getElementById("multiplayer")!.style.display = "block"
-      // console.log("ran")
-
+      // Creating a function to reload the page
       const refresh = () => {window.location.reload()}
-
-      setTimeout(refresh,500)
-      
+      // Wait for 500 miliseconds before running the function to send the deatch request
+      setTimeout(refresh,500) 
 }
 
-
+/**
+ * Method to create the multiplayer game
+ */
 createGame= () => {
-
-  
+  /**
+   * Method to generate the GameID
+   */
   const generateGameId = () => {
-    const socket = io(),
-          _this=this
+    const socket = io(),            // Reference to the io() function
+          _this=this                // Reference to the Multiplayer Class
 
+    // Opbservable to create a new game
     Observable.toSocketIO(socket,"new_game")
     // socket.emit('new_game');
 
+    // Create an array with boolean values
     let allocated:Array<boolean> = []
+    // Initializng the first value to false
     allocated[0] = false
+    // Getting the game_id from the server
     Observable.fromSocketIO(socket,document,"game_id").subscribe((res)=>(_this.updatePlayerHost(res,allocated)))
-
-    // socket.on('game_id',function(res:any){
-    //   console.log("res")
-    //   _this.updatePlayerHost(res,allocated)}
-    // );
 
   }
 
@@ -1335,84 +1441,53 @@ createGame= () => {
 
 }
 
+/**
+ * Method to join the multiplayer game
+ */
 joinGame = () => {
+    // Get the game id from the user entered value
     let game_id = (<HTMLInputElement>document.getElementById("join_game_id")!).value
+    // If the game id is empty
     if (game_id == "") {
+      // Alert the user whether they entered the correct id
       alert("Did you enter a Game ID?")
+      // Switch to single player
       Multiplayer.switchToSP()
 
     }else{
-      const socket = io(),
-          _this = this
+
+      const socket = io(),        // Reference to the io() function
+          _this = this            // Reference to the Multiplayer Class
 
       // socket.emit('join_game',);
-
+      // Sending a request to join the game with the game id
       Observable.toSocketIO(socket,"join_game",game_id.toString())
-      
+      // Getting the data needed from the server to update the client
       Observable.fromSocketIO(socket,document,"join").subscribe((res)=>(_this.updatePlayerClient(res)))
-      // socket.on('join', function(res:any){
-      //   _this.updatePlayerClient(res)}
-      // );
 
-    }
-
-
-
-
-  
+    }  
 }
-
-
 
 }
 
-
-const main = () => {
-  let game = new Gameplay(),
-      html = new HTMLPage(game),
-      multiplayer = new Multiplayer(html);
-
-
-
-
-  
+/**
+ * Main function to run the game
+ */
+const main = ():void => {
+  let game = new Gameplay(),                // Creating a new Gameplay instance
+      html = new HTMLPage(game),            // Passing in the Gameplay class to create a new HTMLPage
+      multiplayer = new Multiplayer(html);  // Creating a new Multiplayer class using the HTMLPage
 }
 
+
+// Calling the main function when the page runs the pong() function
 main()
 
 
-
-
-
 }
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-
 
 // the following simply runs your pong function on window load.  Make sure to leave it in place.
 if (typeof window != 'undefined')
   window.onload = ()=>{
     pong();
-
   }
-
- 
-
- 
