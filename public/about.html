@@ -6,11 +6,11 @@
 <body>
 <div style="display: block;padding:50px;">  
     <h1>About the Game!</h1>
-
-    <h3>Version History</h3>
+    <hr>
+    <h2>Version History</h2>
     <ul>
         <li>
-            1.1.0 beta
+            1.1.0 Beta
             <ul>
                 <li>Multiplayer Pong Game</li>
                 <li>Up to two players in the lobby</li>
@@ -34,20 +34,223 @@
             
         </li>
     </ul>
+    <hr>
 
-    <h3>Description</h3>
+    <h2>Description</h2>
 
-    <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).</p>
+    <p>
+            Pong is one of the earliest arcade video games. It is a table tennis sports game featuring simple two-dimensional graphics. The game was originally manufactured by Atari, which released it in 1972. Allan Alcorn created Pong as a training exercise assigned to him by Atari co-founder Nolan Bushnell. Bushnell based the idea on an electronic ping-pong game included in the Magnavox Odyssey, which later resulted in a lawsuit against Atari. Surprised by the quality of Alcorn's work, Bushnell and Atari co-founder Ted Dabney decided to manufacture the game.
+            (Wikipedia, <a href = "https://en.wikipedia.org/wiki/Pong"> Read More..</a> )
+    </p>
 
-    <h3>Installation</h3>
+        <p>
+            In this project we try to recreate the pong game from the ealy 70's, as an online multiplayer 2D game.
+        </p>
+    <hr>
+    <h2>Installation</h2>
     
+    <h3>1. Moving to the Current Project Directory</h3>
+    <p>
+    In-order to create the server we need to first install some dependencies. <br>
 
+    To do that we need to first move to the project directory,<br>
+
+    So we can use the cd command to move to where the <b>server.js</b> file is located. <br>
+    
+    <pre>
+            cd /[path to directory]/ 
+    </pre>
+
+    If you have done it correctly, when you enter <b>ls</b> in the console you should see the following; <br>
+
+
+    
+    <pre>
+            pc_name:2018Assignment1 user_name$ ls
+            node_modules            package-lock.json       package.json            public                  server.js
+    </pre>
+    
+    Hooray!! <br>
+
+    So far you are in the correct directory.<br>
+    Next part is a bit tricky. But don't worry, just follow the steps.
+
+    </p>
+
+
+
+    <h3>2. Installing the Node Modules</h3>
+    <p>
+    In order to install the node modules we have to first type in the command;
+
+    <pre>
+            npm install
+    </pre>
+
+    This will install all the dependencies needed for the program to run.<br>
+
+    After you install all the dependencies, to check whether they have been installed properly, we can use the following commands;<br><br>
+    
+    To check whether <b>Express</b> is installed properly, we can enter this command,
+
+    <pre>
+            npm list express     
+    </pre>
+    If you have successfully installed it, you should see the output below.
+    <pre>
+            └── express@4.16.3    
+    </pre>
+
+    To check whether <b>Socket.io</b> is installed properly, we can enter this command,
+
+    <pre>
+            npm list socket.io   
+    </pre>
+    If you have successfully installed it, you should see the output below.
+    <pre>
+            └── socket.io@2.1.1   
+    </pre>
+
+    </p>
+
+
+    <h3>3. Starting the Local Server</h3>
+    <p>
+    In-order to start the server, we have to just enter one command <br>
+
+    <pre>
+            node server.js
+    </pre>
+
+    If you have done everything correctly, you should see the following message below.
+
+    <pre>
+            Starting server on port 5000
+    </pre>
+    
+    </p>
+
+
+    <h3>4. Go to the server webpage</h3>
+    <p>
+    Start the browser and then enter the following address<br>
+
+    <pre>
+            http://localhost:5000/
+    </pre>
+
+    If you have done everything correctly, you should see the index.html page from the project directory.<br>
+    Finally!! <br>
+    Just click on the last link to go to the pong.html page, or click <a href="pong.html">here.</a>
+
+
+    
+    </p>
+
+    <hr>
     <h2>How to play?</h2>
+
+    <p>
+        This game has two versions.
+        <ol>
+            <li>Single Player</li>
+            <li>Multiplayer</li>
+        </ol>
+        The two sections below show how to play the game.
+    </p>
 
     <h3>Single Player</h3>
 
-    <h3>MultiPlayer</h3>
+    <h5>Objective - The main objective of the game is to reach the game point first (Set to 11 by default).</h5>
+    <p>
+        <ul>
 
+                <li>To start the single player game the user has to click on the <b>Start button</b></li>
+                <li>By default the game will let the user server the ball.</li>
+                <li>To start each round the user has to <b>click</b> on the pong table.</li>
+                <li>After the ball is being served the CPU will start playing with the user.</li>
+        <br>
+                <li>The paddle is being divided into <b>five zones</b></li>
+                <li>Each zone refelcts the ball in a different pattern</li>
+
+                <img src="img/about/basic.png" height="50%" >
+
+
+                <li>Below are the different reflection patterns</li>
+
+                <ol>
+                    <li>If the ball hits the top 40% it will move towards the top with the <b>same gradient</b>, <br>
+                        If it hits the bottom 40% it will move towards the bottom with the <b>same gradient</b>. <br>
+                        The speed of the ball <b>does not</b> change.
+                    </li>
+
+                    <img src="img/about/top middle.png" height="50%" >
+
+                    <li>If the ball hits the middle 10%, it will move in a <b>random</b> direction out of three directions.<br>
+                    They are either going straight or going up and down with the <b>same gradient</b>.<br>
+                    The speed of the ball <b>does not</b> change.
+                    </li>
+
+                    <img src="img/about/middle.png" height="50%" >
+
+                    <li>If the ball hit the top 5% , it will go up with a <b>higher gradient</b> than the normal gradient of the game,<br>
+                        If the ball hit the bottom 5% , it will go down with a <b>higher gradient</b> than the normal gradient of the game,<br>
+                        The speed of the ball <b>does</b> change with an increase of 50%.
+                    </li>
+
+                    <br>
+                    
+                    <img src="img/about/top.png" height="50%" >
+                </ol>
+        </ul>
+
+        
+
+
+
+        
+
+    </p>
+    <h3>Multiplayer</h3>
+
+    <p>
+        To play the multiplayer game there should be two devices. 
+        <ol>
+            <li>Host Device</li>
+            <li>Client Device</li>
+        </ol>
+
+        
+
+        <h3>Steps to Setup a Multiplayer Game</h3>
+        <ol>
+            <li>First, Both devices should be on the same network</li>
+
+            <li>From the <b>HOST DEVICE</b> go to its localhost address of the device. It will be something like this:</li>
+
+            <pre>
+                    http://localhost:5000/pong.html
+            </pre>
+            <li>Then the <b>CLIENT DEVICE</b> should connect to the IP Address of the <b>HOST DEVICE</b>. If it is on a LAN or WiFi network. It will look something like this:</li>
+            <pre>
+                    http://192.168.8.101:5000/
+            </pre>
+            Instead of the IP Address please use the IP Address of the <b>HOST DEVICE</b> in the WiFi Network.
+            If the connection is successful, the <b>CLIENT DEVICE</b> should go to the index page of the project.
+            <li>Then from the <b>CLIENT DEVICE</b>, click on the last link and go to the pong.html page</li>
+            <br>
+            <b>Everything is Okay. Both Devices working on the same server.</b>
+            <br><br>
+            <li>Using the <b>HOST DEVICE</b> click on the Create Game, You will get an autogenerated GameID.</li>
+            <li>On the <b>CLIENT DEVICE</b>, Enter the GameID at the text box above the Join Game button and click on the Join Game button</li>
+            <br>
+            <b>Brilliant!! . Now Both Devices are on the same game. You should see the paddle moving one both the devices when you move it on one device.</b>
+            <br><br>
+            <li>Finally the <b>HOST DEVICE</b> has to click on the pong table to start serving. <br>
+                The user on the <b>HOST DEVICE</b> will be the only person to serve through out the whole game.<br>
+                But the serving side changes as in Single Player</li>
+        </ol>
+    </p>
 </div>
 </body>
 </html>
