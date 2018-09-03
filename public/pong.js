@@ -394,78 +394,76 @@ function pong() {
             };
             this.host_gameplay = () => {
                 let mouseup = () => null;
-                if (this.SOCKETID === this.USERS[0]) {
-                    mouseup = Observable.fromEvent(HTMLPage.svg, 'mouseup')
-                        .filter((s => !SessionData.game_data.round_started))
-                        .subscribe(s => (SessionData.game_data.round_started = true, SessionData.session_data.end_ball_movement = SessionData.session_data.current_ball.ball_movement(SessionData.game_data.start_direction)));
-                    SessionData.session_data.gameplay_main = Observable.interval(10)
-                        .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
-                        .subscribe(({ x }) => {
-                        if (Number(x) < (Number(HTMLPage.svg.getAttribute("x")) - Number(SessionData.session_data.current_ball.getBall().attr("r")))) {
-                            GameSound.game_sound.fail.play();
-                            SessionData.game_data.score_right += 1;
-                            document.getElementById("score2").textContent = (SessionData.game_data.score_right).toString();
-                            SessionData.session_data.end_ball_movement();
-                            SessionData.game_data.round_started = false;
-                            SessionData.game_data.start_direction = -1;
-                            this.html_page.getPlayerTurn().textContent = "Right is Serving";
-                            SessionData.session_data.current_ball.getBall().attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-                                .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
-                            let res = {
-                                "status": 0,
-                                "game_id": this.GAMEID,
-                                "score_1": SessionData.game_data.score_left,
-                                "score_2": SessionData.game_data.score_right,
-                                "message": "Right is Serving"
-                            };
-                            io().emit("score_update", res);
+                mouseup = Observable.fromEvent(HTMLPage.svg, 'mouseup')
+                    .filter((s => !SessionData.game_data.round_started))
+                    .subscribe(s => (SessionData.game_data.round_started = true, SessionData.session_data.end_ball_movement = SessionData.session_data.current_ball.ball_movement(SessionData.game_data.start_direction)));
+                SessionData.session_data.gameplay_main = Observable.interval(10)
+                    .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
+                    .subscribe(({ x }) => {
+                    if (Number(x) < (Number(HTMLPage.svg.getAttribute("x")) - Number(SessionData.session_data.current_ball.getBall().attr("r")))) {
+                        GameSound.game_sound.fail.play();
+                        SessionData.game_data.score_right += 1;
+                        document.getElementById("score2").textContent = (SessionData.game_data.score_right).toString();
+                        SessionData.session_data.end_ball_movement();
+                        SessionData.game_data.round_started = false;
+                        SessionData.game_data.start_direction = -1;
+                        this.html_page.getPlayerTurn().textContent = "Right is Serving";
+                        SessionData.session_data.current_ball.getBall().attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                            .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
+                        let res = {
+                            "status": 0,
+                            "game_id": this.GAMEID,
+                            "score_1": SessionData.game_data.score_left,
+                            "score_2": SessionData.game_data.score_right,
+                            "message": "Right is Serving"
+                        };
+                        io().emit("score_update", res);
+                    }
+                    else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x")) + Number(SessionData.session_data.current_ball.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width")))) {
+                        GameSound.game_sound.fail.play();
+                        SessionData.game_data.score_left += 1;
+                        document.getElementById("score1").textContent = (SessionData.game_data.score_left).toString();
+                        SessionData.session_data.end_ball_movement();
+                        SessionData.game_data.round_started = false;
+                        SessionData.game_data.start_direction = 1;
+                        this.html_page.getPlayerTurn().textContent = "Left is Serving";
+                        SessionData.session_data.current_ball.getBall().attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                            .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
+                        let res = {
+                            "status": 0,
+                            "game_id": this.GAMEID,
+                            "score_1": SessionData.game_data.score_left,
+                            "score_2": SessionData.game_data.score_right,
+                            "message": "Left is Serving"
+                        };
+                        io().emit("score_update", res);
+                    }
+                    if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point) {
+                        document.getElementById("singleplayer_button").style.display = "none";
+                        document.getElementById("loader2").style.display = "block";
+                        GameSound.game_sound.fail.play();
+                        SessionData.session_data.gameplay_main();
+                        if (this.SOCKETID === this.USERS[0]) {
+                            mouseup();
                         }
-                        else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x")) + Number(SessionData.session_data.current_ball.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width")))) {
-                            GameSound.game_sound.fail.play();
-                            SessionData.game_data.score_left += 1;
-                            document.getElementById("score1").textContent = (SessionData.game_data.score_left).toString();
-                            SessionData.session_data.end_ball_movement();
-                            SessionData.game_data.round_started = false;
-                            SessionData.game_data.start_direction = 1;
-                            this.html_page.getPlayerTurn().textContent = "Left is Serving";
-                            SessionData.session_data.current_ball.getBall().attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-                                .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
-                            let res = {
-                                "status": 0,
-                                "game_id": this.GAMEID,
-                                "score_1": SessionData.game_data.score_left,
-                                "score_2": SessionData.game_data.score_right,
-                                "message": "Left is Serving"
-                            };
-                            io().emit("score_update", res);
-                        }
-                        if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point) {
-                            document.getElementById("singleplayer_button").style.display = "none";
-                            document.getElementById("loader2").style.display = "block";
-                            GameSound.game_sound.fail.play();
-                            SessionData.session_data.gameplay_main();
-                            if (this.SOCKETID === this.USERS[0]) {
-                                mouseup();
-                            }
-                            SessionData.session_data.end_ball_movement();
-                            SessionData.session_data.current_ball.getBall().attr("r", 0);
-                            this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds.";
-                            SessionData.game_data.score_left > SessionData.game_data.score_right ? this.html_page.getGameBanner().textContent = "Left Won the Game" : this.html_page.getGameBanner().textContent = "Right Won the Game";
-                            SessionData.game_data.round_started = true;
-                            let res = {
-                                "status": 1,
-                                "game_id": this.GAMEID,
-                                "score_1": SessionData.game_data.score_left,
-                                "score_2": SessionData.game_data.score_right,
-                                "message": "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
-                            };
-                            io().emit("score_update", res);
-                            io().emit("detach", this.GAMEID);
-                            const refresh = () => { window.location.reload(); };
-                            setTimeout(refresh, 5000);
-                        }
-                    });
-                }
+                        SessionData.session_data.end_ball_movement();
+                        SessionData.session_data.current_ball.getBall().attr("r", 0);
+                        this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds.";
+                        SessionData.game_data.score_left > SessionData.game_data.score_right ? this.html_page.getGameBanner().textContent = "Left Won the Game" : this.html_page.getGameBanner().textContent = "Right Won the Game";
+                        SessionData.game_data.round_started = true;
+                        let res = {
+                            "status": 1,
+                            "game_id": this.GAMEID,
+                            "score_1": SessionData.game_data.score_left,
+                            "score_2": SessionData.game_data.score_right,
+                            "message": "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
+                        };
+                        io().emit("score_update", res);
+                        io().emit("detach", this.GAMEID);
+                        const refresh = () => { window.location.reload(); };
+                        setTimeout(refresh, 5000);
+                    }
+                });
             };
             this.createGame = () => {
                 const generateGameId = () => {
@@ -513,6 +511,7 @@ function pong() {
             Observable.fromSocketIO(socket, document, "player_update").subscribe((res) => _this.updateLobbyTable(res, socket, trying_count));
         }
         startMultiplayerGame() {
+            const _this = this;
             SessionData.session_data.gameplay_main ? (SessionData.session_data.gameplay_main(), SessionData.session_data.end_ball_movement(), SessionData.session_data.end_cpu_paddle_movement()) : undefined;
             SessionData.game_data.score_left = 0;
             SessionData.game_data.score_right = 0;
@@ -531,13 +530,11 @@ function pong() {
                 .filter(({ y }) => y <= (Number(HTMLPage.svg.getAttribute("height"))) - Number(SessionData.session_data.current_paddle.attr("height")) - Settings.settings.padding && y >= Settings.settings.padding)
                 .map((y) => ({ gameid: this.GAMEID, y: y.y, socket: this.SOCKETID }))
                 .subscribe(s => (observableSocket.toSocketIO(socket, 'movement', s)));
-            const _this = this;
             Observable.fromSocketIO(socket, document, "player_movement").subscribe((res) => _this.updatePaddles(res, pongTable));
             o = Observable
                 .fromEvent(HTMLPage.svg, "mousemove")
                 .map(({ clientX, clientY }) => ({ x: clientX, y: clientY }))
                 .subscribe(_ => HTMLPage.svg.style.cursor = "none");
-            console.log(this.USERS);
             if (this.SOCKETID === this.USERS[0]) {
                 Observable.interval(Settings.settings.game_speed)
                     .map(s => ({
@@ -553,12 +550,15 @@ function pong() {
             if (this.SOCKETID === this.USERS[1]) {
                 Observable.fromSocketIO(socket, document, "update_score").subscribe((res) => this.updateScore(res));
             }
-            this.host_gameplay();
+            if (this.SOCKETID === this.USERS[0]) {
+                this.host_gameplay();
+            }
         }
         ballLocation(data) {
             if (data.gameid == this.GAMEID) {
-                SessionData.session_data.current_ball.getBall().attr("cx", data.x);
-                SessionData.session_data.current_ball.getBall().attr("cy", data.y);
+                SessionData.session_data.current_ball.getBall()
+                    .attr("cx", data.x)
+                    .attr("cy", data.y);
             }
         }
         updateLobbyTable(res, socket, trying_count) {
