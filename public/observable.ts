@@ -98,7 +98,12 @@ class SafeObserver<T> implements Observer<T> {
     })
   }
 
-
+  /**
+   * create an Observable from a SOCKETIO Event
+   * @param socket the io() function
+   * @param el the HTML Element
+   * @param name the socket event to observe
+   */
   static fromSocketIO<E extends Event>(socket:any,el: Node,name: string): Observable<E> {
     return new Observable<E>((observer: Observer<E>) => {
       const stream = socket.on(name,(res:any)=>observer.next(res))
@@ -107,6 +112,12 @@ class SafeObserver<T> implements Observer<T> {
     })
   }
   
+  /**
+   * create an Observable to send data to the server
+   * @param socket the io() function
+   * @param name the name of the socket event
+   * @param request the request to send to the server
+   */
   static toSocketIO(socket:any,name: string,request?:any,) {
     socket.emit(name,request)
 }
