@@ -39,7 +39,7 @@
 </div>
        
 <div id="options" style="display: block">
-                <h1 onclick="myFunction()" style="text-align:center;cursor:pointer;">Options &nbsp<i id="arrow" class="down"></i></h2>     
+                <h1 onclick="spinIcon()" style="text-align:center;cursor:pointer;">Options &nbsp<i id="arrow" class="down"></i></h2>     
             <div id="settings" style="display: none">
             <table>      
                 <tr>
@@ -117,17 +117,17 @@
     </body>
     <script>
 
-    function myFunction() {
+    function spinIcon() {
                 let x = document.getElementById("settings");
                 let arrow = document.getElementById("arrow");
                 if (x.style.display === "none") {
-                    arrow.style.webkitTransform = "rotate(-135deg)"
-                    arrow.style.transform = "rotate(-135deg)"
-                    x.style.display = "block";
+                        arrow.style.transform = "rotate(-135deg)"
+                        arrow.style.webkitTransform = "rotate(-135deg)"
+                        x.style.display = "block";
                 } else {
                     x.style.display = "none";
-                    arrow.style.webkitTransform = "rotate(45deg)"
                     arrow.style.transform = "rotate(45deg)"
+                    arrow.style.webkitTransform = "rotate(45deg)"
                 }
             }
     </script>
