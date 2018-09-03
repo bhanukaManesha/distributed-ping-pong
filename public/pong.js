@@ -375,6 +375,7 @@ function pong() {
     class Multiplayer {
         constructor(htmlPage) {
             this.updateScore = (res) => {
+                const socket = io();
                 if (res.game_id == this.GAMEID) {
                     SessionData.game_data.score_left = res.score_1;
                     SessionData.game_data.score_right = res.score_2;
@@ -386,17 +387,19 @@ function pong() {
                         document.getElementById("singleplayer_button").style.display = "none";
                         SessionData.game_data.score_left > SessionData.game_data.score_right ? this.html_page.getGameBanner().textContent = "Left Won the Game" : this.html_page.getGameBanner().textContent = "Right Won the Game";
                         SessionData.game_data.round_started = true;
-                        io().emit("detach", this.GAMEID);
+                        Observable.toSocketIO(socket, "detach", this.GAMEID);
                         const refresh = () => { window.location.reload(); };
                         setTimeout(refresh, 5000);
                     }
                 }
             };
             this.host_gameplay = () => {
+                const socket = io();
                 let mouseup = () => null;
                 mouseup = Observable.fromEvent(HTMLPage.svg, 'mouseup')
                     .filter((s => !SessionData.game_data.round_started))
-                    .subscribe(s => (SessionData.game_data.round_started = true, SessionData.session_data.end_ball_movement = SessionData.session_data.current_ball.ball_movement(SessionData.game_data.start_direction)));
+                    .subscribe(s => (SessionData.game_data.round_started = true,
+                    SessionData.session_data.end_ball_movement = SessionData.session_data.current_ball.ball_movement(SessionData.game_data.start_direction)));
                 SessionData.session_data.gameplay_main = Observable.interval(10)
                     .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
                     .subscribe(({ x }) => {
@@ -408,7 +411,8 @@ function pong() {
                         SessionData.game_data.round_started = false;
                         SessionData.game_data.start_direction = -1;
                         this.html_page.getPlayerTurn().textContent = "Right is Serving";
-                        SessionData.session_data.current_ball.getBall().attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                        SessionData.session_data.current_ball.getBall()
+                            .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
                             .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
                         let res = {
                             "status": 0,
@@ -417,7 +421,7 @@ function pong() {
                             "score_2": SessionData.game_data.score_right,
                             "message": "Right is Serving"
                         };
-                        io().emit("score_update", res);
+                        Observable.toSocketIO(socket, "score_update", res);
                     }
                     else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x")) + Number(SessionData.session_data.current_ball.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width")))) {
                         GameSound.game_sound.fail.play();
@@ -427,7 +431,8 @@ function pong() {
                         SessionData.game_data.round_started = false;
                         SessionData.game_data.start_direction = 1;
                         this.html_page.getPlayerTurn().textContent = "Left is Serving";
-                        SessionData.session_data.current_ball.getBall().attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                        SessionData.session_data.current_ball.getBall()
+                            .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
                             .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
                         let res = {
                             "status": 0,
@@ -436,16 +441,13 @@ function pong() {
                             "score_2": SessionData.game_data.score_right,
                             "message": "Left is Serving"
                         };
-                        io().emit("score_update", res);
+                        Observable.toSocketIO(socket, "score_update", res);
                     }
                     if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point) {
                         document.getElementById("singleplayer_button").style.display = "none";
                         document.getElementById("loader2").style.display = "block";
-                        GameSound.game_sound.fail.play();
                         SessionData.session_data.gameplay_main();
-                        if (this.SOCKETID === this.USERS[0]) {
-                            mouseup();
-                        }
+                        mouseup();
                         SessionData.session_data.end_ball_movement();
                         SessionData.session_data.current_ball.getBall().attr("r", 0);
                         this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds.";
@@ -458,8 +460,8 @@ function pong() {
                             "score_2": SessionData.game_data.score_right,
                             "message": "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
                         };
-                        io().emit("score_update", res);
-                        io().emit("detach", this.GAMEID);
+                        Observable.toSocketIO(socket, "score_update", res);
+                        Observable.toSocketIO(socket, "detach", this.GAMEID);
                         const refresh = () => { window.location.reload(); };
                         setTimeout(refresh, 5000);
                     }
@@ -563,7 +565,6 @@ function pong() {
         }
         updateLobbyTable(res, socket, trying_count) {
             if (res.game_data !== undefined) {
-                console.log("its hereee");
                 document.getElementById("gameid").textContent = "Game ID : " + res.game;
                 if (res.game == this.GAMEID) {
                     if (res.socket == this.SOCKETID || this.SOCKETID == null || Object.keys((res.game_data)).length === 2) {
@@ -602,9 +603,8 @@ function pong() {
                                     tick.setAttribute("src", "img/tick.png");
                                 }
                                 else {
-                                    text_1 = document.createTextNode("Waitng...");
+                                    text_1 = document.createTextNode("Waiting......");
                                     tick = document.createElement("img");
-                                    tick.setAttribute("src", "img/tick.png");
                                 }
                                 tick.setAttribute("height", "80px");
                                 tick.setAttribute("weight", "1000px");
@@ -645,8 +645,6 @@ function pong() {
                     allocated[0] = true;
                     this.GAMEID = res.gameid;
                     this.SOCKETID = res.socket_id;
-                    console.log("ha");
-                    console.log(res.gameid);
                     document.getElementById("gameid").textContent = "Game ID : " + res.gameid;
                     document.getElementById("player_wait_banner").style.display = "block";
                 }
@@ -674,7 +672,8 @@ function pong() {
     }
     Multiplayer.MULTIPLAYER_STATUS = false;
     Multiplayer.switchToSP = () => {
-        io().emit("detach", "check");
+        const socket = io();
+        Observable.toSocketIO(socket, "detach", "check");
         const refresh = () => { window.location.reload(); };
         setTimeout(refresh, 500);
     };
