@@ -784,60 +784,86 @@ class HTMLPage {
 
 
 
-
+/**
+ * Class that is used to initialize the multiplayer version of the game and start the multiplayer game
+ */
 class Multiplayer {
 
-  static MULTIPLAYER_STATUS = false;
-
-  private GAMEID:string|null;
-  private SOCKETID:string|null;
-
-  private USERS:Array<string>
-
-  private html_page:HTMLPage;
+  static MULTIPLAYER_STATUS = false;          // Attribute that defines whether the multiplayer game is on or not
+                                              // Defined to false by default
   
+  private GAMEID:string|null;                 // Private attribute to store the Game ID of the current session
+  private SOCKETID:string|null;               // Private attribute to store the Socket ID of the current session
+  private USERS:Array<string>                 // Private attribute to store the USERS/Players of the current session
+  private html_page:HTMLPage;                 // Private attribute to store the HTML Page of the current session
+  
+  /**
+   * Constructor for Multiplayer Class
+   * @param htmlPage Reference to the HTML Page that is used to generate the multiplayer game
+   */
   constructor(htmlPage:HTMLPage){
-    // this.STATUS = false
+    // Setting the create game button to run the createGame function
     document.getElementById("creategame")!.onclick = this.createGame
+    // Setting the join game button to run the joinGame function
     document.getElementById("joingame")!.onclick = this.joinGame
 
+    // Initializing the USERS Array as an empty array
     this.USERS = []
+    // Initializing the GAMEID to be null
     this.GAMEID = null
+    // Initializing the SOCKETID to be null
     this.SOCKETID = null
+    // Initializing the html_page to be the reference to the html passed from the constructor
     this.html_page = htmlPage
   }
 
-  private createLobby(game_id = undefined) {
+  /**
+   * Function used to create the lobby
+   * @param game_id the game_id of the current game
+   */
+  private createLobby(game_id = undefined):void {
+    // Initializing the UI elements to create the lobby
     document.getElementById("lobby")!.style.display = "block"
     document.getElementById("game")!.style.display = "none"
     document.getElementById("options")!.style.display = "none"
     document.getElementById("singleplayer")!.style.display = "block"
     document.getElementById("multiplayer")!.style.display = "none"
 
+    // Setting the Multiplayer status to be true to signify that the Multiplayer Game has started
     Multiplayer.MULTIPLAYER_STATUS = true
     
+    // Changing the GameID to the current GameID of the Session
     game_id?document.getElementById("gameid")!.textContent = "Game ID :" + game_id:undefined
     
+    // Calling the update lobby players function to update the players
     this.updateLobbyPlayers()
   }
 
-  private updateLobbyPlayers() {    
-      // document.getElementById("gameid")!.textContent = "Game ID : "+res.gameid
-      const _this = this,
-          socket = io()
+  /**
+   * This method is used to update the lobby players and the lobby player table
+   */
+  private updateLobbyPlayers():void {    
       
-      let trying_count = [0]
+      const _this = this,           // Getting a reference to the current Multiplayer class and storing it as a constant
+          socket = io()             // Getting a reference to the SocketIO's io() function
+      
+      let trying_count:Array<number> = [0]        // Storing the trying count and assigning the count to 0 to keep track of the amount of
+                                                  // times the server sent the users
   
+
+      // Getting the users from the server and passing it to the updateLobbyTable function
       Observable.fromSocketIO(socket,document,"player_update").subscribe((res)=>_this.updateLobbyTable(res,socket,trying_count))
-      // socket.on('player_update',function(res:any){
-      //   _this.updateLobbyTable(res,socket,trying_count)
-      // });
 
       
       
     }
 
-  startMultiplayerGame() {
+  /**
+   * This method is used to start the multiplayer game after getting both users ready
+   */
+  public startMultiplayerGame():void {
+
+      const _this = this;               // Getting a reference to the current Multiplayer class and storing it as a constant
 
       // Resetting all the game data
       SessionData.session_data.gameplay_main?(SessionData.session_data.gameplay_main(),SessionData.session_data.end_ball_movement(),SessionData.session_data.end_cpu_paddle_movement()):undefined
@@ -852,79 +878,95 @@ class Multiplayer {
 
       // Making the ping pong table svg visible
       document.getElementById("game")!.style.display = "block"
+      // Making the start button invisible
       document.getElementById("start")!.style.display = "none"
 
       // Creating all the elements in the pong table
       let pongTable = new PongTable(HTMLPage.svg);
 
-
       // Getting a reference to the socket from the server
       let socket = io()
+      // Getting a reference to the Observable Class
       const observableSocket = Observable
 
 
 
       // Sending the paddle movements to the server to be sent back to all the clients
       let o = Observable
+      // Getting the mousemove event to an Observerbale
       .fromEvent<MouseEvent>(document, "mousemove")
+      // Get the y cordinates from mouse move
       .map(({clientY})=>({y: clientY}))
+      // Get the y value from the ClientRect
       .map(({y}) => ({y: y-HTMLPage.svg.getBoundingClientRect().top}))
+      // Filter the y values that makes the paddle reach outof bounds
       .filter(({y}) => y <= (Number(HTMLPage.svg.getAttribute("height"))) - Number(SessionData.session_data.current_paddle!.attr("height")) - Settings.settings.padding && y >= Settings.settings.padding)  
+      // Create an object with the game and the socket ID
       .map((y)=> ({gameid : this.GAMEID, y:y.y,socket:this.SOCKETID } ))
+      // Subscribe to the observable to send the data to the server in order to be sent back to both clients
       .subscribe(s=>(observableSocket.toSocketIO(socket,'movement', s)))
-      // .subscribe(s=>(socket.emit('movement', s)))
       
-      // Updating the paddle movements from the users to be displayed
-      const _this = this;
-
+  
+      // Updating the paddle movements from the users to be displayed in both the client browsers
       Observable.fromSocketIO(socket,document,"player_movement").subscribe((res)=>_this.updatePaddles(res,pongTable))
-      // socket.on('player_movement',function(res:any){
-      //   _this.updatePaddles(res,pongTable)}
-      // );
-
 
       // Hiding cursor when over the svg
       o = Observable
+          // Getting the mousemove cordinates from the mouse event 
           .fromEvent<MouseEvent>(HTMLPage.svg, "mousemove")
+          // Mapping the client X and Client y
           .map(({clientX, clientY})=>({x: clientX, y: clientY}))
+          // Subscribe to the mouse event to hide the cursour when over the svg element
           .subscribe(_=>HTMLPage.svg.style.cursor = "none")
       
-       console.log(this.USERS)
       // Host sending the cordinates to update the ball
       if (this.SOCKETID === this.USERS[0]){
+          // Creating an observable that notifies every given time
           Observable.interval(Settings.settings.game_speed)
+          // Creating an object to send the ball coordinates to the server
           .map(s=>({
             gameid:this.GAMEID,
             x:SessionData.session_data.current_ball!.getBall().attr("cx"),
             y:SessionData.session_data.current_ball!.getBall().attr("cy")}))
+          // Subscribing to the observable to send the data to the server
           .subscribe(s => Observable.toSocketIO(socket,'ball', s))
-          // .subscribe(s => socket.emit('ball', {gameid:this.GAMEID,x:SessionData.session_data.current_ball!.getBall().attr("cx"),y:SessionData.session_data.current_ball!.getBall().attr("cy"), player_one:this.USERS[0], socket: this.SOCKETID}))
         }
 
       // Client updating the ball
       if (this.SOCKETID === this.USERS[1]){
+        // Getting the ball cordinates from the server and passing it to the ballLocation to update the location
+        // of the ball
         Observable.fromSocketIO(socket,document,"ball_move").subscribe((res)=>this.ballLocation(res))
-        // socket.on('ball_move',(res:any) =>this.ballLocation(res));
 
       }
 
+      // Client updating the score
       if (this.SOCKETID === this.USERS[1]){
+        // Getting the score from the server and passing it to the updateScore to update the game score
         Observable.fromSocketIO(socket,document,"update_score").subscribe((res)=>this.updateScore(res))
-        // socket.on('update_score', this.updateScore)
       }
 
-      // SessionData.session_data.end_ball_movement= Ball.ball_movement(SessionData.game_data.start_direction)
-      // if (Multiplayer.SOCKETID === Multiplayer.USERS[0]){
+      // Host starting the game and sending information to the server
+      if (this.SOCKETID === this.USERS[0]){
+        // Calling the host gameplay method
         this.host_gameplay()
-      // }
+      }
       
-
   }
 
+  /**
+   * Function to update the ball location 
+   * @param data the data from the server to update the ball location
+   */
   private ballLocation(data:any) {
+    // Check if the data is to the correct GAMEID
     if (data.gameid == this.GAMEID){
-      SessionData.session_data.current_ball!.getBall().attr("cx",data.x)
-      SessionData.session_data.current_ball!.getBall().attr("cy",data.y)
+      // If so, update the current ball location of the client
+      SessionData.session_data.current_ball!.getBall()
+            // Update the x axis
+            .attr("cx",data.x)
+            // Update the y axis
+            .attr("cy",data.y)
     }
 
   }
@@ -957,7 +999,6 @@ class Multiplayer {
   private host_gameplay = <T>() =>{
   
     let mouseup:() => void = () => null
-    if (this.SOCKETID === this.USERS[0]){
         mouseup = Observable.fromEvent<MouseEvent>(HTMLPage.svg, 'mouseup')
         .filter((s=>!SessionData.game_data.round_started))
         .subscribe(s=>(SessionData.game_data.round_started = true, SessionData.session_data.end_ball_movement= SessionData.session_data.current_ball!.ball_movement(SessionData.game_data.start_direction)))
@@ -1054,7 +1095,6 @@ class Multiplayer {
       
       })
     
-    }
   }
 
 private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
