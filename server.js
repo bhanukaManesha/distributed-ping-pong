@@ -190,7 +190,7 @@ io.on('connection', function(socket) {
           } 
         }
       }
-      // Deatch from the server
+      // Detach from the server
       delete gameData[res]
       })
 });
