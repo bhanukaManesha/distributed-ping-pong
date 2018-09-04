@@ -300,7 +300,7 @@ class Ball {
                                 && Number(y_cord) < Number(paddle.attr("y"))+Number(paddle.attr("height")) + Number(this.ball.attr("r")))
             }
             /**
-             * This fucntion is used if there is a paddle collision, to calculate where the ball is colliding with the paddle and to take the appropirate direction change accordingly
+             * This function is used if there is a paddle collision, to calculate where the ball is colliding with the paddle and to take the appropirate direction change accordingly
              */
             const direction_change = ():{x:string,y:string}=>{
                               // If there is a paddle collision to play the collision sound
@@ -708,7 +708,7 @@ class HTMLPage {
     updategame())
     :
     // If user says no, then rivert all the changes back
-    undefined
+    this.init()
 
   }
 
@@ -1189,8 +1189,18 @@ private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
           // Setting the SOCKETID as null
           this.SOCKETID = null
 
-          //Switch to singleplayer mode
-          Multiplayer.switchToSP()
+          // Sending the detach signal to the server
+          Observable.toSocketIO(socket,"detach",this.GAMEID)
+
+          // io().emit("score_update",res)
+          // io().emit("detach",this.GAMEID)
+
+          // Create a function to refresh the page
+          const refresh = () => {window.location.reload()}
+            
+          // Waiting 5 seconds and then refreshing the page
+          setTimeout(refresh,1)
+
           // Notify the user that the server TIMED OUT
           alert("Timed Out. Please try again.")
         }

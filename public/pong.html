@@ -5,7 +5,8 @@
 
         </style>
         <script src="/socket.io/socket.io.js"></script>
-
+        <title>Pong!</title>
+        <link rel="shortcut icon" href="img/pong.png">
     </head>
     <body>
         <h1 style="font-size:5em;display: block;text-align:center;margin-bottom:3px">Pong</h1>
@@ -43,14 +44,36 @@
             <div id="settings" style="display: none">
             <table>      
                 <tr>
+                        <td colspan="3" style="text-align: center;font-weight: bold;background-color: white;padding: 20px;"> <text style="color:black;">Gameplay Settings</text>></td>
+                </tr>
+
+                <tr>
                         <td><label for="ball_speed">Difficulty</label></td>
                         <td> <input type="text" id="ball_speed"></td>
                 </tr>
                 <tr>
                         <td><label for="player_side">Player Side</label></td>
-                        <td style="display:block"> <input type="radio" name="player_side" id="left_side" value="left" checked style="display:inline"> Left<br>
-                            <input type="radio" name="player_side" id="right_side" value="right" style="display:inline"> Right<br></td>
+                        <td style="display:block;"> 
+                        
+                        <div style="display:inline">
+                                <input type="radio" name="player_side" id="left_side" value="left" checked> Left
+                                        
+                        </div>
+                        <div style="display:inline"> 
+                                <input type="radio" name="player_side" id="right_side" value="right"> Right
+                        </div>
+                </td>
                 </tr>
+
+                <tr>
+                        <td><label for="game_point">Game Point</label></td>
+                        <td> <input type="text" id="game_point"></td>
+                </tr>
+
+                <tr>
+                        <td colspan="3" style="text-align: center;font-weight: bold;background-color: white;padding: 20px;"> <text style="color:black;">Visual Settings</text>></td>
+                </tr>
+
                 <tr>
                         <td><label for="paddle_height">Paddle Height</label></td>
                         <td> <input type="text" id="paddle_height"></td>
@@ -65,16 +88,7 @@
                         <td><label for="twidth">Table Width</label></td>
                         <td> <input type="text" id="twidth"></td>
                 </tr>
-                
-                <tr>
-                        <td><label for="frame_rate">Frame Rate</label></td>
-                        <td> <input type="text" id="frame_rate"></td>
-                </tr>
-                <tr>
-                        <td><label for="game_point">Game Point</label></td>
-                        <td> <input type="text" id="game_point"></td>
-                </tr>
-                
+
                 <tr>
                         <td><label for="dash_gap">Center Line Dash Gap</label></td>
                         <td> <input type="text" id="dash_gap"></td>
@@ -83,6 +97,17 @@
                         <td><label for="padding">Padding Around the Play Area</label></td>
                         <td> <input type="text" id="padding"></td>
                 </tr>
+
+                <tr>
+                        <td colspan="3" style="text-align: center;font-weight: bold;background-color: white;padding: 20px;"> <text style="color:black;">Other Settings</text>></td>
+                </tr>
+                <tr>
+                        <td><label for="frame_rate">Frame Rate</label></td>
+                        <td> <input type="text" id="frame_rate"></td>
+                </tr>
+                
+                
+                
             </table>
 
             <br>

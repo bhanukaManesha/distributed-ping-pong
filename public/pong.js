@@ -320,7 +320,7 @@ function pong() {
                         document.getElementById("canvas").setAttribute("width", Settings.settings.table_width.toString()),
                         updategame())
                     :
-                        undefined;
+                        this.init();
             };
             this.start_game = () => {
                 SessionData.session_data.gameplay_main ?
@@ -576,7 +576,9 @@ function pong() {
                             Observable.toSocketIO(socket, "stop_searching_for_players", this.GAMEID);
                             this.GAMEID = null;
                             this.SOCKETID = null;
-                            Multiplayer.switchToSP();
+                            Observable.toSocketIO(socket, "detach", this.GAMEID);
+                            const refresh = () => { window.location.reload(); };
+                            setTimeout(refresh, 1);
                             alert("Timed Out. Please try again.");
                         }
                         if (Object.keys(res.game_data).length <= 2) {
