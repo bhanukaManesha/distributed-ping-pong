@@ -279,179 +279,148 @@ class Ball {
         const gradients = [0,-Settings.settings.ball_speed,Settings.settings.ball_speed,-Settings.settings.ball_speed-0.5,Settings.settings.ball_speed+0.5]
 
         // Starting gradient factor for the ball and the start direction of the ball
-        let x_change = gradients[2]*-ball_starting_direction
+        let x_change = gradients[2]*ball_starting_direction
         // Starting y accelaration for the ball using a random value between the gradients [0,-1,1] ( if the ball speed is 1)
         let y_change = Math.floor((Math.random() * 3))
-        /**
-         * Function used to get the ball direction if the trajectory is blocked by a paddle, if there is not collison ot will just keep on moving in the same gradients
-         */
-        // const getBallDirection = (x_cord:string,y_cord:string,paddle:Elem) : {x:string,y:string}=>{
-
-        //     /**
-        //      * Function used to calculate whether there is a collision with the paddle
-        //      */
-        //     const paddle_collison = ():boolean=>{
-
-        //                         // If the ball center + radius is inside the limits of a paddle, then it is considered to be a paddle collision
-        //                         return (Number(x_cord) - Number(this.ball.attr("r")) < Number(paddle.attr("x"))+ Number(paddle.attr("width"))
-        //                         && Number(x_cord) + Number(this.ball.attr("r")) >Number(paddle.attr("x"))-Number(paddle.attr("width"))
-        //                         && Number(y_cord) + Number(this.ball.attr("r")) > Number(paddle.attr("y")) 
-        //                         && Number(y_cord) < Number(paddle.attr("y"))+Number(paddle.attr("height")) + Number(this.ball.attr("r")))
-        //     }
-        //     /**
-        //      * This function is used if there is a paddle collision, to calculate where the ball is colliding with the paddle and to take the appropirate direction change accordingly
-        //      */
-        //     const direction_change = ():{x:string,y:string}=>{
-        //                       // If there is a paddle collision to play the collision sound
-        //                       GameSound.game_sound.collision.play()
-        //                       // Check whether the collision is in the bottom 45% of the paddle
-        //                       if (Number(y_cord)>  Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 + (Number(paddle.attr("height"))/2)*0.05)   ){
-        //                         // Check whether the collision is in the bottom 5% of the paddle
-        //                         if (Number(y_cord)>  Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 + Number(paddle.attr("height"))*0.45)   ){   
-        //                           // If it is in the bottom 5% then increase the ball speed by 0.5
-        //                           return (x_change = (-x_change*gradients[4]),y_change = gradients[4],{x:x_cord,y:y_cord})
-        //                         }else{
-        //                           // If it is in the bottom 40% from the center then increase then jusr change the direction of the ball
-        //                           return (x_change = (-x_change),y_change = gradients[2],{x:x_cord,y:y_cord})
-        //                         }
-        //                       // Check whether the collision is in the top 45% of the paddle
-        //                       } else if (Number(y_cord)<Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 - (Number(paddle.attr("height"))/2)*0.05) ){
-        //                         // Check whether the collision is in the top 5% of the paddle
-        //                         if (Number(y_cord)<Number(paddle.attr("y")) + (Number(paddle.attr("height"))/2 - Number(paddle.attr("height"))*0.45) ) {
-        //                           // If it is in the bottom 5% then increase the ball speed by 0.5
-        //                           return (x_change = (-x_change*gradients[4]),y_change = gradients[3],{x:x_cord,y:y_cord})
-        //                         }else{
-        //                           // If it is in the top 40% from the center then increase then jusr change the direction of the ball
-        //                           return (x_change = (-x_change),y_change = gradients[1],{x:x_cord,y:y_cord})
-        //                         }
-        //                       }else{
-        //                         // If it is in the middle 10% of the paddle get a random y change (eg.0,1,-1) to randomize the game
-        //                         return (x_change = (-x_change),y_change = gradients[Math.floor((Math.random() * 3))],{x:x_cord,y:y_cord})
-        //                       }
-        //     }
-        //     // Check whether there's paddle collison if so return the changed direction cordinates or just return the coordinates
-        //   return paddle_collison() ? 
-        //         (direction_change())
-        //         :
-        //           {x:x_cord,y:y_cord}
-        //   }
-      //   // Ball movement is based on a Observable sending data every millisecond decided by the user
-      //   return Observable.interval(Settings.settings.game_speed)
-      //   .map(s=>(
-      //     {x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
-      //   // Check if the ball is colliding with the left paddle
-      //   .map(
-      //       ({x,y})=> getBallDirection(x,y,SessionData.session_data.current_paddle!))
-      //   // Check if the ball is colliding with the right paddle 
-      //   .map(
-      //       ({x,y})=> getBallDirection(x,y,SessionData.session_data.opponent_paddle!))
-      //   // Calculating the bottom side to change the direction of the ball
-      //   .map(
-      //       ({x,y})=> Number(y)>Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.ball.attr("r")) ? 
-      //           // Play game sound for collision
-      //           (GameSound.game_sound.collision.play(),
-      //           // Negating the y change value
-      //           y_change = (-y_change),
-      //             {x:x,y:y}
-      //           )
-      //           :
-      //           (y_change = y_change,
-      //             {x:x,y:y}
-      //           ))
-      //   // Calculating the top side to change the direction of the ball
-      //   .map(
-      //       ({x,y})=> Number(y)<Settings.settings.padding+Number(this.ball.attr("r")) ? 
-      //           // Play game sound for collision
-      //           (GameSound.game_sound.collision.play(),
-      //           // Negating the y change value
-      //           y_change = (-y_change),
-      //             {x:x,y:y}
-      //           )
-      //           :
-      //           (y_change = y_change,
-      //             {x:x,y:y}
-      //           ))      
-      //   // Adding the current change to the new change 
-      //   .map(({x,y})=>(
-      //     {x:x_change+Number(x) ,y:y_change+Number(y) }))
-
-      //   // Subscribing to chnage the ball x attribute and y attribute
-      //   .subscribe(({x,y})=>(
-      //     this.ball.attr('cx', x),
-      //     this.ball.attr('cy', y))
-      // );
         
-        
-    let normal:()=>void = ()=>null
-    let bottomSide:()=>void = ()=>null
-    let topSide:()=>void = ()=>null
+        // Defining functions to unsubscribe the observables
+        let normal:()=>void = ()=>null,                         // Unsubscribe for the normal ball movement
+        bottomSide:()=>void = ()=>null,                         // Unsubscribe for the ball colliding with the bottom side
+        topSide:()=>void = ()=>null,                            // Unsubscribe for the ball colliding with the top side
+        currentPaddleTop:()=>void = ()=>null,                   // Unsubscribe for ball colliding with the top of the user's paddle
+        currentPaddleTopMiddle:()=>void = ()=>null,             // Unsubscribe for ball colliding with the top middle of the user's paddle
+        currentPaddleMiddle:()=>void = ()=>null,                // Unsubscribe for ball colliding with the middle of the user's paddle
+        currentPaddleBottomMiddle:()=>void = ()=>null,          // Unsubscribe for ball colliding with the bottom middle of the user's paddle
+        currentPaddleBottom:()=>void = ()=>null,                // Unsubscribe for ball colliding with the bottom of the user's paddle
+        opponentPaddleTop:()=>void = ()=>null,                  // Unsubscribe for ball colliding with the top of the opponent's paddle
+        opponentPaddleTopMiddle:()=>void = ()=>null,            // Unsubscribe for ball colliding with the top middle of the opponent's paddle
+        opponentPaddleMiddle:()=>void = ()=>null,               // Unsubscribe for ball colliding with the middle of the opponent's paddle
+        opponentPaddleBottomMiddle:()=>void = ()=>null,         // Unsubscribe for ball colliding with the bottom middle of the opponent's paddle
+        opponentPaddleBottom:()=>void = ()=>null                // Unsubscribe for ball colliding with the bottom of the opponent's paddle
 
-    let currentPaddleTop:()=>void = ()=>null
-    let currentPaddleTopMiddle:()=>void = ()=>null
-    let currentPaddleMiddle:()=>void = ()=>null
-    let currentPaddleBottomMiddle:()=>void = ()=>null
-    let currentPaddleBottom:()=>void = ()=>null
+        // Getting a reference to an Observable which maps the cx and cy values of the ball
+        const observableFromBall = Observable.interval(Settings.settings.game_speed).map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
 
-    let opponentPaddleTop:()=>void = ()=>null
-    let opponentPaddleTopMiddle:()=>void = ()=>null
-    let opponentPaddleMiddle:()=>void = ()=>null
-    let opponentPaddleBottomMiddle:()=>void = ()=>null
-    let opponentPaddleBottom:()=>void = ()=>null
+        // Getting a reference to an Observable which maps the cx and cy values of the ball which filters the values that collide with the user paddle
+        const observableFromBallAfterCollisionCurrentPaddle = Observable.interval(Settings.settings.game_speed).map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
+              .filter(({x,y}) => 
+                    Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.current_paddle!.attr("x"))+ Number(SessionData.session_data.current_paddle!.attr("width"))
+                    && Number(x) + Number(this.ball.attr("r")) >Number(SessionData.session_data.current_paddle!.attr("x"))-Number(SessionData.session_data.current_paddle!.attr("width"))
+                    && Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.current_paddle!.attr("y")) 
+                    && Number(y) < Number(SessionData.session_data.current_paddle!.attr("y"))+Number(SessionData.session_data.current_paddle!.attr("height")) + Number(this.ball.attr("r"))
+                    )
+        // Getting a reference to an Observable which maps the cx and cy values of the ball which filters the values that collide with the opponent paddle
+        const observableFromBallAfterCollisionOpponentPaddle = Observable.interval(Settings.settings.game_speed).map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
+              .filter(({x,y}) => 
+                    Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.opponent_paddle!.attr("x"))+ Number(SessionData.session_data.opponent_paddle!.attr("width"))
+                    && Number(x) + Number(this.ball.attr("r")) >Number(SessionData.session_data.opponent_paddle!.attr("x"))-Number(SessionData.session_data.opponent_paddle!.attr("width"))
+                    && Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.opponent_paddle!.attr("y")) 
+                    && Number(y) < Number(SessionData.session_data.opponent_paddle!.attr("y"))+Number(SessionData.session_data.opponent_paddle!.attr("height")) + Number(this.ball.attr("r"))
+                    )
 
+          // Increasing the ball increment to move the ball
+          normal = Observable.interval(Settings.settings.game_speed)
+              .map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
+              .map(({x,y})=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
+              .subscribe(({x,y})=>(
+                this.ball.attr('cx', x),
+                this.ball.attr('cy', y))
+          );
 
-    const observableFromBall = Observable.interval(Settings.settings.game_speed).map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
-    const observableFromBallAfterCollisionCurrentPaddle = Observable.interval(Settings.settings.game_speed).map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
+          // If the ball collide with the 
+          bottomSide = observableFromBall
+              .filter(({x,y}) => (Number(y)>Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.ball.attr("r"))))
+              .map((_) => (
+                (GameSound.game_sound.collision.play(),
+                // Negating the y change value
+                y_change = (-y_change))))
+              // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
+              .subscribe((_)=>(
+                this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
+                this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
+          );
+
+          // top
+          topSide = observableFromBall
+              .filter(({x,y}) => Number(y)<Settings.settings.padding+Number(this.ball.attr("r")))
+              .map((_) => (
+                (GameSound.game_sound.collision.play(),
+                // Negating the y change value
+                y_change = (-y_change))))
+              // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
+              .subscribe((_)=>(
+                this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
+                this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
+          );
+
+          // paddle top
+          currentPaddleTop = observableFromBallAfterCollisionCurrentPaddle
+              .filter(({x,y}) => 
+              Number(y) <=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))*0.05   
+              )
+              .map((_) => (
+                GameSound.game_sound.collision.play(),
+                x_change = (-x_change*gradients[4]),
+                y_change = gradients[3]
+              ))
+              // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
+              .subscribe((_)=>(
+                this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
+                this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
+          );
+
+          // paddle top
+          currentPaddleTopMiddle = observableFromBallAfterCollisionCurrentPaddle
           .filter(({x,y}) => 
-                Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.current_paddle!.attr("x"))+ Number(SessionData.session_data.current_paddle!.attr("width"))
-                && Number(x) + Number(this.ball.attr("r")) >Number(SessionData.session_data.current_paddle!.attr("x"))-Number(SessionData.session_data.current_paddle!.attr("width"))
-                && Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.current_paddle!.attr("y")) 
-                && Number(y) < Number(SessionData.session_data.current_paddle!.attr("y"))+Number(SessionData.session_data.current_paddle!.attr("height")) + Number(this.ball.attr("r"))
-                )
-    const observableFromBallAfterCollisionOpponentPaddle = Observable.interval(Settings.settings.game_speed).map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
-          .filter(({x,y}) => 
-                Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.opponent_paddle!.attr("x"))+ Number(SessionData.session_data.opponent_paddle!.attr("width"))
-                && Number(x) + Number(this.ball.attr("r")) >Number(SessionData.session_data.opponent_paddle!.attr("x"))-Number(SessionData.session_data.opponent_paddle!.attr("width"))
-                && Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.opponent_paddle!.attr("y")) 
-                && Number(y) < Number(SessionData.session_data.opponent_paddle!.attr("y"))+Number(SessionData.session_data.opponent_paddle!.attr("height")) + Number(this.ball.attr("r"))
-                )
-
-      normal = Observable.interval(Settings.settings.game_speed)
-          .map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
-          .map(({x,y})=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
-          .subscribe(({x,y})=>(
-            this.ball.attr('cx', x),
-            this.ball.attr('cy', y))
-      );
-      // bottom
-      bottomSide = observableFromBall
-          .filter(({x,y}) => (Number(y)>Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.ball.attr("r"))))
+          (Number(y) >  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))*0.05) &&
+          (Number(y) <  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
+          )
           .map((_) => (
-            (GameSound.game_sound.collision.play(),
-            // Negating the y change value
-            y_change = (-y_change))))
+            GameSound.game_sound.collision.play(),
+            x_change = (-x_change),
+            y_change = gradients[1]
+          ))
           // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
-      );
+            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-      // top
-      topSide = observableFromBall
-          .filter(({x,y}) => Number(y)<Settings.settings.padding+Number(this.ball.attr("r")))
+
+          currentPaddleMiddle = observableFromBallAfterCollisionCurrentPaddle
+          .filter(({x,y}) => 
+          (Number(y) >=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05) &&
+          (Number(y) <=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  +  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
+          )
           .map((_) => (
-            (GameSound.game_sound.collision.play(),
-            // Negating the y change value
-            y_change = (-y_change))))
+            GameSound.game_sound.collision.play(),
+            x_change = (-x_change),
+            y_change = gradients[Math.floor((Math.random() * 3))]
+          ))
           // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
-      );
+            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-      // paddle top
-      currentPaddleTop = observableFromBallAfterCollisionCurrentPaddle
+
+          currentPaddleBottomMiddle = observableFromBallAfterCollisionCurrentPaddle
           .filter(({x,y}) => 
-          Number(y) <=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))*0.05   
+          (Number(y) >  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  +  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05) &&
+          (Number(y) <  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
+          )
+          .map((_) => (
+            GameSound.game_sound.collision.play(),
+            x_change = (-x_change),
+            y_change = gradients[2]
+          ))
+          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
+          .subscribe((_)=>(
+            this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
+            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
+
+
+          currentPaddleBottom = observableFromBallAfterCollisionCurrentPaddle
+          .filter(({x,y}) => 
+          (Number(y) >=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
           )
           .map((_) => (
             GameSound.game_sound.collision.play(),
@@ -461,77 +430,77 @@ class Ball {
           // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
-      );
-
-       // paddle top
-       currentPaddleTopMiddle = observableFromBallAfterCollisionCurrentPaddle
-       .filter(({x,y}) => 
-       (Number(y) >  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))*0.05) &&
-       (Number(y) <  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
-       )
-       .map((_) => (
-        GameSound.game_sound.collision.play(),
-        x_change = (-x_change),
-        y_change = gradients[1]
-       ))
-       // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
-       .subscribe((_)=>(
-         this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-         this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
+            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
 
-      currentPaddleMiddle = observableFromBallAfterCollisionCurrentPaddle
-       .filter(({x,y}) => 
-       (Number(y) >=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05) &&
-       (Number(y) <=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  +  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
-       )
-       .map((_) => (
-        GameSound.game_sound.collision.play(),
-        x_change = (-x_change),
-        y_change = gradients[Math.floor((Math.random() * 3))]
-       ))
-       // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
-       .subscribe((_)=>(
-         this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-         this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
+          // paddle top
+          opponentPaddleTop = observableFromBallAfterCollisionOpponentPaddle
+              .filter(({x,y}) => 
+              Number(y) <=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05   
+              )
+              .map((_) => (
+                GameSound.game_sound.collision.play(),
+                x_change = (-x_change*gradients[4]),
+                y_change = gradients[3]
+              ))
+              // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
+              .subscribe((_)=>(
+                this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
+                this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
+          );
 
-
-       currentPaddleBottomMiddle = observableFromBallAfterCollisionCurrentPaddle
-       .filter(({x,y}) => 
-       (Number(y) >  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  +  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05) &&
-       (Number(y) <  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
-       )
-       .map((_) => (
-        GameSound.game_sound.collision.play(),
-        x_change = (-x_change),
-        y_change = gradients[2]
-       ))
-       // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
-       .subscribe((_)=>(
-         this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-         this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
-
-
-      currentPaddleBottom = observableFromBallAfterCollisionCurrentPaddle
-       .filter(({x,y}) => 
-       (Number(y) >=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
-       )
-       .map((_) => (
-        GameSound.game_sound.collision.play(),
-        x_change = (-x_change),
-        y_change = gradients[2]
-       ))
-       // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
-       .subscribe((_)=>(
-         this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-         this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
-
-
-      // paddle top
-      opponentPaddleTop = observableFromBallAfterCollisionOpponentPaddle
+          // paddle top
+          opponentPaddleTopMiddle = observableFromBallAfterCollisionOpponentPaddle
           .filter(({x,y}) => 
-          Number(y) <=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05   
+          (Number(y) >  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05) &&
+          (Number(y) <  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
+          )
+          .map((_) => (
+            GameSound.game_sound.collision.play(),
+            x_change = (-x_change),
+            y_change = gradients[1]
+          ))
+          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
+          .subscribe((_)=>(
+            this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
+            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
+
+
+          opponentPaddleMiddle = observableFromBallAfterCollisionOpponentPaddle
+          .filter(({x,y}) => 
+          (Number(y) >=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05) &&
+          (Number(y) <=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  +  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
+          )
+          .map((_) => (
+            GameSound.game_sound.collision.play(),
+            x_change = (-x_change),
+            y_change = gradients[Math.floor((Math.random() * 3))]
+          ))
+          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
+          .subscribe((_)=>(
+            this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
+            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
+
+
+          opponentPaddleBottomMiddle = observableFromBallAfterCollisionOpponentPaddle
+          .filter(({x,y}) => 
+          (Number(y) >  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  +  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05) &&
+          (Number(y) <  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
+          )
+          .map((_) => (
+            GameSound.game_sound.collision.play(),
+            x_change = (-x_change),
+            y_change = gradients[2]
+          ))
+          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
+          .subscribe((_)=>(
+            this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
+            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
+
+
+        opponentPaddleBottom = observableFromBallAfterCollisionOpponentPaddle
+          .filter(({x,y}) => 
+          (Number(y) >=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
           )
           .map((_) => (
             GameSound.game_sound.collision.play(),
@@ -541,94 +510,30 @@ class Ball {
           // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
-      );
+            this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-       // paddle top
-       opponentPaddleTopMiddle = observableFromBallAfterCollisionOpponentPaddle
-       .filter(({x,y}) => 
-       (Number(y) >  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05) &&
-       (Number(y) <  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
-       )
-       .map((_) => (
-        GameSound.game_sound.collision.play(),
-        x_change = (-x_change),
-        y_change = gradients[1]
-       ))
-       // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
-       .subscribe((_)=>(
-         this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-         this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
+          
+          return () => (
+            normal(),
+            bottomSide(),
+            topSide(),
 
+            currentPaddleTop(),
+            currentPaddleTopMiddle(),
+            currentPaddleMiddle(),
+            currentPaddleBottomMiddle(),
+            currentPaddleBottom(),
 
-      opponentPaddleMiddle = observableFromBallAfterCollisionOpponentPaddle
-       .filter(({x,y}) => 
-       (Number(y) >=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05) &&
-       (Number(y) <=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  +  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
-       )
-       .map((_) => (
-        GameSound.game_sound.collision.play(),
-        x_change = (-x_change),
-        y_change = gradients[Math.floor((Math.random() * 3))]
-       ))
-       // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
-       .subscribe((_)=>(
-         this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-         this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
-
-
-      opponentPaddleBottomMiddle = observableFromBallAfterCollisionOpponentPaddle
-       .filter(({x,y}) => 
-       (Number(y) >  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  +  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05) &&
-       (Number(y) <  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
-       )
-       .map((_) => (
-        GameSound.game_sound.collision.play(),
-        x_change = (-x_change),
-        y_change = gradients[2]
-       ))
-       // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
-       .subscribe((_)=>(
-         this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-         this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
-
-
-    opponentPaddleBottom = observableFromBallAfterCollisionOpponentPaddle
-       .filter(({x,y}) => 
-       (Number(y) >=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
-       )
-       .map((_) => (
-        GameSound.game_sound.collision.play(),
-        x_change = (-x_change),
-        y_change = gradients[2]
-       ))
-       // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
-       .subscribe((_)=>(
-         this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
-         this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
-
-      
-      return () => (
-        normal(),
-        bottomSide(),
-        topSide(),
-
-        currentPaddleTop(),
-        currentPaddleTopMiddle(),
-        currentPaddleMiddle(),
-        currentPaddleBottomMiddle(),
-        currentPaddleBottom(),
-
-        opponentPaddleTop(),
-        opponentPaddleTopMiddle(),
-        opponentPaddleMiddle(),
-        opponentPaddleBottomMiddle(),
-        opponentPaddleBottom()
-      )
+            opponentPaddleTop(),
+            opponentPaddleTopMiddle(),
+            opponentPaddleMiddle(),
+            opponentPaddleBottomMiddle(),
+            opponentPaddleBottom()
+          )
 
 
 
-    }
+        }
 
     
 }
@@ -692,7 +597,7 @@ class CPUPaddleMovement{
           //   {y:increment(Number(y))}))
           
       
-            moveDown = Observable.interval(0.1)
+            moveDown = Observable.interval(Settings.settings.game_speed)
                     .map(s=>(
                       {x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
                     
@@ -707,7 +612,7 @@ class CPUPaddleMovement{
                       this.paddle!.attr("y",y.toString())))
                   
 
-            moveUp = Observable.interval(0.1)
+            moveUp = Observable.interval(Settings.settings.game_speed)
                     .map(s=>(
                       {x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
                     
@@ -722,7 +627,7 @@ class CPUPaddleMovement{
                   
                       
       
-            stay = Observable.interval(0.1)
+            stay = Observable.interval(Settings.settings.game_speed)
                     .map(s=>(
                       {x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
                     
@@ -925,12 +830,12 @@ class Gameplay {
                 this.session_data.end_cpu_paddle_movement(),
                 // Generating the random value to be used as the starting position for the next round
                 this.session_data.current_ball!.getBall()
-                  .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                  .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding + Number(this.session_data.current_ball!.getBall().attr("r"))))
                   .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2),
                 // Setting the flag to start the next round as false
                 this.game_data.round_started = false,
                 // Changing the direction of the ball so that it moves towards the left player
-                this.game_data.start_direction = -1,
+                this.game_data.start_direction = 1,
                 // Update the GUI Element to indicate which side is serving
                 this.htmlPage!.getGameBanner().textContent = "Left is Serving"
 
@@ -958,12 +863,12 @@ class Gameplay {
                  this.session_data.end_cpu_paddle_movement(),
                  // Generating the random value to be used as the starting position for the next round
                  this.session_data.current_ball!.getBall()
-                   .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                   .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding + Number(this.session_data.current_ball!.getBall().attr("r"))))
                    .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2),
                  // Setting the flag to start the next round as false
                  this.game_data.round_started = false,
                  // Changing the direction of the ball so that it moves towards the right player
-                 this.game_data.start_direction = 1,
+                 this.game_data.start_direction = -1,
                  // Update the GUI Element to indicate which side is serving
                  this.htmlPage!.getGameBanner().textContent = "Right is Serving"
  
@@ -1453,122 +1358,263 @@ class Multiplayer {
           // Start the ball movement
           SessionData.session_data.end_ball_movement= SessionData.session_data.current_ball!.ball_movement(SessionData.game_data.start_direction)))
     
-    // Creating an observable to notify every 10 milliseconds
-    SessionData.session_data.gameplay_main = Observable.interval(10)
-    // Get the current ball x axis
-    .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
-    // Subscribe to the observable to update the scores
-    .subscribe(
-      ({x})=>{
-        // Checking if the x value of the ball is less than the left bound
-        if (Number(x) < (Number(HTMLPage.svg.getAttribute("x"))-Number(SessionData.session_data.current_ball!.getBall().attr("r")))) {
-                // Play the sound for the ball going out of bounds 
-                GameSound.game_sound.fail.play()
+    // // Creating an observable to notify every 10 milliseconds
+    // SessionData.session_data.gameplay_main = Observable.interval(10)
+    // // Get the current ball x axis
+    // .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
+    // // Subscribe to the observable to update the scores
+    // .subscribe(
+    //   ({x})=>{
+    //     // Checking if the x value of the ball is less than the left bound
+    //     if (Number(x) < (Number(HTMLPage.svg.getAttribute("x"))-Number(SessionData.session_data.current_ball!.getBall().attr("r")))) {
+    //             // Play the sound for the ball going out of bounds 
+    //             GameSound.game_sound.fail.play()
+    //             // Increase the score of the right side player by one
+    //             SessionData.game_data.score_right+=1
+    //             // Update the GUI score
+    //             document.getElementById("score2")!.textContent = (SessionData.game_data.score_right).toString()
+    //             // End the ball movement observable
+    //             SessionData.session_data.end_ball_movement()
+    //             // Setting the flag to start the next round as false
+    //             SessionData.game_data.round_started = false
+    //             // Changing the direction of the ball so that it moves towards the left player
+    //             SessionData.game_data.start_direction = -1
+    //             // Update the GUI Element to indicate which side is serving
+    //             this.html_page.getPlayerTurn().textContent = "Right is Serving"
+    //             // Generating the random value to be used as the starting position for the next round
+    //             SessionData.session_data.current_ball!.getBall()
+    //             .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+    //             .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
+    //             // Creating an object to be sent to the server with all the socre data
+    //             let res = {
+    //               "status" : 0,
+    //               "game_id" : this.GAMEID,
+    //               "score_1" : SessionData.game_data.score_left,
+    //               "score_2" : SessionData.game_data.score_right,
+    //               "message" : "Right is Serving"
+    //             }
+    //             // Sending the data to the server
+    //             Observable.toSocketIO(socket,"score_update",res)
+    //             // io().emit("score_update",res)
+  
+    //           // Checking if the x value of the ball is greater than the right bound
+    //           }else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(SessionData.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))){
+    //             // Play the sound for the ball going out of bounds 
+    //             GameSound.game_sound.fail.play()
+    //             // Increase the score of the left side player by one
+    //             SessionData.game_data.score_left +=1
+    //             // Update the GUI score
+    //             document.getElementById("score1")!.textContent = (SessionData.game_data.score_left).toString()
+    //             // End the ball movement observable
+    //             SessionData.session_data.end_ball_movement()
+    //             // Setting the flag to start the next round as false
+    //             SessionData.game_data.round_started = false
+    //             // Changing the direction of the ball so that it moves towards the right player
+    //             SessionData.game_data.start_direction = 1
+    //             // Update the GUI Element to indicate which side is serving
+    //             this.html_page.getPlayerTurn().textContent = "Left is Serving"
+    //             // Generating the random value to be used as the starting position for the next round
+    //             SessionData.session_data.current_ball!.getBall()
+    //             .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+    //             .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
+    //             // Creating an object to be sent to the server with all the score data
+    //             let res = {
+    //               "status" : 0,
+    //               "game_id" : this.GAMEID,
+    //               "score_1" : SessionData.game_data.score_left,
+    //               "score_2" : SessionData.game_data.score_right,
+    //               "message" : "Left is Serving"
+    //             }
+    //             // Sending the data to the server
+    //             Observable.toSocketIO(socket,"score_update",res)
+    //             // io().emit("score_update",res)
+    //   }
+    //   // Checking after increasing score whether any player has reached the game point
+    //   if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point){
+    //           // Hiding the single player button
+    //           document.getElementById("singleplayer_button")!.style.display = "none"
+    //           // Showing the loader until the host sends the data to the server
+    //           document.getElementById("loader2")!.style.display = "block"
+    //           // Ending the mouse up observable so that it wont start a new game
+    //           SessionData.session_data.gameplay_main()
+    //           // Ending the mouse up observable
+    //           mouseup()
+    //           // Calling the unsubscribe function to end the ball movement
+    //           SessionData.session_data.end_ball_movement()
+    //            // Setting the radius of the ball to 0 to hide the ball
+    //           SessionData.session_data.current_ball!.getBall().attr("r",0)
+    //           // Updating the GUI to prompt the user to wait
+    //           this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
+    //           // Check which player won and update the GUI accordingly 
+    //           SessionData.game_data.score_left>SessionData.game_data.score_right?this.html_page.getGameBanner().textContent = "Left Won the Game":this.html_page.getGameBanner().textContent = "Right Won the Game"
+    //           // Set the flag to true to stop the game from starting
+    //           SessionData.game_data.round_started = true
+    //           // Creating an object to be sent to the server with all the score data  
+    //           let res = {
+    //             "status" : 1,
+    //             "game_id" : this.GAMEID,
+    //             "score_1" : SessionData.game_data.score_left,
+    //             "score_2" : SessionData.game_data.score_right,
+    //             "message" : "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
+    //           }
+
+    //           // Sending the data to the server
+    //           Observable.toSocketIO(socket,"score_update",res)
+
+    //           // Sending the detach signal to the server
+    //           Observable.toSocketIO(socket,"detach",this.GAMEID)
+
+    //           // io().emit("score_update",res)
+    //           // io().emit("detach",this.GAMEID)
+
+    //           // Create a function to refresh the page
+    //           const refresh = () => {window.location.reload()}
+    //            // Waiting 5 seconds and then refreshing the page
+    //           setTimeout(refresh,5000)
+
+    //   }
+    // })
+
+    let scoreLeft:()=>void = ()=>null
+    let scoreRight:()=>void = ()=>null
+    let gameWin:()=>void = ()=>null
+
+     // Creating an observable that fires every game (Userdefined framerate) milliseconds
+     scoreLeft = Observable.interval(Settings.settings.game_speed)
+     // Using the current ball reference stored in the class attribute, we get the x axis values for the ball
+     .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
+     .filter(({x}) => (Number(x) < (Number(HTMLPage.svg.getAttribute("x"))-Number(SessionData.session_data.current_ball!.getBall().attr("r")))))
+     // Calling the subscribe function to check whether the ball is in bounds are if not calculating the points
+     .subscribe(
+       ({x})=>
+         ((
+                  // Play the sound for the ball going out of bounds 
+                GameSound.game_sound.fail.play(),
                 // Increase the score of the right side player by one
-                SessionData.game_data.score_right+=1
+                SessionData.game_data.score_right+=1,
                 // Update the GUI score
-                document.getElementById("score2")!.textContent = (SessionData.game_data.score_right).toString()
+                document.getElementById("score2")!.textContent = (SessionData.game_data.score_right).toString(),
                 // End the ball movement observable
-                SessionData.session_data.end_ball_movement()
+                SessionData.session_data.end_ball_movement(),
                 // Setting the flag to start the next round as false
-                SessionData.game_data.round_started = false
+                SessionData.game_data.round_started = false,
                 // Changing the direction of the ball so that it moves towards the left player
-                SessionData.game_data.start_direction = -1
+                SessionData.game_data.start_direction = -1,
                 // Update the GUI Element to indicate which side is serving
-                this.html_page.getPlayerTurn().textContent = "Right is Serving"
+                this.html_page.getPlayerTurn().textContent = "Right is Serving",
                 // Generating the random value to be used as the starting position for the next round
                 SessionData.session_data.current_ball!.getBall()
                 .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-                .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
+                .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2),
                 // Creating an object to be sent to the server with all the socre data
-                let res = {
+                // and Sending the data to the server
+                Observable.toSocketIO(socket,"score_update",{
                   "status" : 0,
                   "game_id" : this.GAMEID,
                   "score_1" : SessionData.game_data.score_left,
                   "score_2" : SessionData.game_data.score_right,
                   "message" : "Right is Serving"
-                }
-                // Sending the data to the server
-                Observable.toSocketIO(socket,"score_update",res)
-                // io().emit("score_update",res)
-  
-              // Checking if the x value of the ball is greater than the right bound
-              }else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(SessionData.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))){
-                // Play the sound for the ball going out of bounds 
-                GameSound.game_sound.fail.play()
+                })
+
+ 
+         ))
+       )
+ 
+      // Creating an observable that fires every game (Userdefined framerate) milliseconds
+      scoreRight = Observable.interval(Settings.settings.game_speed)
+      // Using the current ball reference stored in the class attribute, we get the x axis values for the ball
+      .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
+      .filter(({x}) => (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(SessionData.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))))
+      // Calling the subscribe function to check whether the ball is in bounds are if not calculating the points
+      .subscribe(
+        ({x})=>
+          (
+                  // Play the sound for the ball going out of bounds 
+                GameSound.game_sound.fail.play(),
                 // Increase the score of the left side player by one
-                SessionData.game_data.score_left +=1
+                SessionData.game_data.score_left +=1,
                 // Update the GUI score
-                document.getElementById("score1")!.textContent = (SessionData.game_data.score_left).toString()
+                document.getElementById("score1")!.textContent = (SessionData.game_data.score_left).toString(),
                 // End the ball movement observable
-                SessionData.session_data.end_ball_movement()
+                SessionData.session_data.end_ball_movement(),
                 // Setting the flag to start the next round as false
-                SessionData.game_data.round_started = false
+                SessionData.game_data.round_started = false,
                 // Changing the direction of the ball so that it moves towards the right player
-                SessionData.game_data.start_direction = 1
+                SessionData.game_data.start_direction = 1,
                 // Update the GUI Element to indicate which side is serving
-                this.html_page.getPlayerTurn().textContent = "Left is Serving"
+                this.html_page.getPlayerTurn().textContent = "Left is Serving",
                 // Generating the random value to be used as the starting position for the next round
                 SessionData.session_data.current_ball!.getBall()
                 .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-                .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
-                // Creating an object to be sent to the server with all the score data
-                let res = {
+                .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2),
+                // Creating an object to be sent to the server with all the score data and
+                // Sending the data to the server
+                Observable.toSocketIO(socket,"score_update",{
                   "status" : 0,
                   "game_id" : this.GAMEID,
                   "score_1" : SessionData.game_data.score_left,
                   "score_2" : SessionData.game_data.score_right,
                   "message" : "Left is Serving"
-                }
-                // Sending the data to the server
-                Observable.toSocketIO(socket,"score_update",res)
+                })
                 // io().emit("score_update",res)
-      }
-      // Checking after increasing score whether any player has reached the game point
-      if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point){
+  
+          )
+        )
+ 
+       // Creating an observable that fires every game (Userdefined framerate) milliseconds
+      gameWin = Observable.interval(Settings.settings.game_speed)
+      // Using the current ball reference stored in the class attribute, we get the x axis values for the ball
+      .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
+      .filter(({x}) => (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point))
+      // Calling the subscribe function to check whether the ball is in bounds are if not calculating the points
+      .subscribe(
+        ({x})=>
+          (
               // Hiding the single player button
-              document.getElementById("singleplayer_button")!.style.display = "none"
+              document.getElementById("singleplayer_button")!.style.display = "none",
               // Showing the loader until the host sends the data to the server
-              document.getElementById("loader2")!.style.display = "block"
+              document.getElementById("loader2")!.style.display = "block",
               // Ending the mouse up observable so that it wont start a new game
-              SessionData.session_data.gameplay_main()
+              SessionData.session_data.gameplay_main(),
               // Ending the mouse up observable
-              mouseup()
+              mouseup(),
               // Calling the unsubscribe function to end the ball movement
-              SessionData.session_data.end_ball_movement()
+              SessionData.session_data.end_ball_movement(),
                // Setting the radius of the ball to 0 to hide the ball
-              SessionData.session_data.current_ball!.getBall().attr("r",0)
+              SessionData.session_data.current_ball!.getBall().attr("r",0),
               // Updating the GUI to prompt the user to wait
-              this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
+              this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds.",
               // Check which player won and update the GUI accordingly 
-              SessionData.game_data.score_left>SessionData.game_data.score_right?this.html_page.getGameBanner().textContent = "Left Won the Game":this.html_page.getGameBanner().textContent = "Right Won the Game"
+              SessionData.game_data.score_left>SessionData.game_data.score_right?this.html_page.getGameBanner().textContent = "Left Won the Game":this.html_page.getGameBanner().textContent = "Right Won the Game",
               // Set the flag to true to stop the game from starting
-              SessionData.game_data.round_started = true
-              // Creating an object to be sent to the server with all the score data  
-              let res = {
+              SessionData.game_data.round_started = true,
+              // Creating an object to be sent to the server with all the score data and 
+              // Sending the data to the server
+              Observable.toSocketIO(socket,"score_update",{
                 "status" : 1,
                 "game_id" : this.GAMEID,
                 "score_1" : SessionData.game_data.score_left,
                 "score_2" : SessionData.game_data.score_right,
                 "message" : "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
-              }
-
-              // Sending the data to the server
-              Observable.toSocketIO(socket,"score_update",res)
+              }),
 
               // Sending the detach signal to the server
-              Observable.toSocketIO(socket,"detach",this.GAMEID)
+              Observable.toSocketIO(socket,"detach",this.GAMEID),
 
               // io().emit("score_update",res)
               // io().emit("detach",this.GAMEID)
 
-              // Create a function to refresh the page
-              const refresh = () => {window.location.reload()}
-               // Waiting 5 seconds and then refreshing the page
-              setTimeout(refresh,5000)
+              // Create a function to refresh the page and 
+              // Waiting 5 seconds and then refreshing the page
+              setTimeout(() => {window.location.reload()},5000)
+  
+          )
+        )
+ 
+ 
+         SessionData.session_data.gameplay_main = () => (scoreLeft(),scoreRight(),gameWin())
 
-      }
-    })
+
   }
 
 /**
@@ -1725,6 +1771,8 @@ private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
               document.getElementById("player_wait_banner")!.style.display = "block"
               // Display that both players are ready
               document.getElementById("player_wait_banner")!.textContent = "Both Players Connected. To Start the Game, the Host has to click on the table."
+               // Display that both players are ready
+               document.getElementById("player_turn")!.textContent = "Left is Serving"
               // Start the multiplayer game 
               this.startMultiplayerGame()
             

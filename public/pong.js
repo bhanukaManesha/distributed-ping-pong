@@ -124,21 +124,9 @@ function pong() {
         constructor() {
             this.ball_movement = (ball_starting_direction) => {
                 const gradients = [0, -Settings.settings.ball_speed, Settings.settings.ball_speed, -Settings.settings.ball_speed - 0.5, Settings.settings.ball_speed + 0.5];
-                let x_change = gradients[2] * -ball_starting_direction;
+                let x_change = gradients[2] * ball_starting_direction;
                 let y_change = Math.floor((Math.random() * 3));
-                let normal = () => null;
-                let bottomSide = () => null;
-                let topSide = () => null;
-                let currentPaddleTop = () => null;
-                let currentPaddleTopMiddle = () => null;
-                let currentPaddleMiddle = () => null;
-                let currentPaddleBottomMiddle = () => null;
-                let currentPaddleBottom = () => null;
-                let opponentPaddleTop = () => null;
-                let opponentPaddleTopMiddle = () => null;
-                let opponentPaddleMiddle = () => null;
-                let opponentPaddleBottomMiddle = () => null;
-                let opponentPaddleBottom = () => null;
+                let normal = () => null, bottomSide = () => null, topSide = () => null, currentPaddleTop = () => null, currentPaddleTopMiddle = () => null, currentPaddleMiddle = () => null, currentPaddleBottomMiddle = () => null, currentPaddleBottom = () => null, opponentPaddleTop = () => null, opponentPaddleTopMiddle = () => null, opponentPaddleMiddle = () => null, opponentPaddleBottomMiddle = () => null, opponentPaddleBottom = () => null;
                 const observableFromBall = Observable.interval(Settings.settings.game_speed).map(s => ({ x: this.ball.attr('cx'), y: this.ball.attr('cy') }));
                 const observableFromBallAfterCollisionCurrentPaddle = Observable.interval(Settings.settings.game_speed).map(s => ({ x: this.ball.attr('cx'), y: this.ball.attr('cy') }))
                     .filter(({ x, y }) => Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.current_paddle.attr("x")) + Number(SessionData.session_data.current_paddle.attr("width"))
@@ -201,8 +189,8 @@ function pong() {
                 currentPaddleBottom = observableFromBallAfterCollisionCurrentPaddle
                     .filter(({ x, y }) => (Number(y) >= Number(SessionData.session_data.current_paddle.attr("y")) + Number(SessionData.session_data.current_paddle.attr("height")) - Number(SessionData.session_data.current_paddle.attr("height")) * 0.05))
                     .map((_) => (GameSound.game_sound.collision.play(),
-                    x_change = (-x_change),
-                    y_change = gradients[2]))
+                    x_change = (-x_change * gradients[4]),
+                    y_change = gradients[3]))
                     .subscribe((_) => (this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change),
                     this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)));
                 opponentPaddleTop = observableFromBallAfterCollisionOpponentPaddle
@@ -239,8 +227,8 @@ function pong() {
                 opponentPaddleBottom = observableFromBallAfterCollisionOpponentPaddle
                     .filter(({ x, y }) => (Number(y) >= Number(SessionData.session_data.opponent_paddle.attr("y")) + Number(SessionData.session_data.opponent_paddle.attr("height")) - Number(SessionData.session_data.opponent_paddle.attr("height")) * 0.05))
                     .map((_) => (GameSound.game_sound.collision.play(),
-                    x_change = (-x_change),
-                    y_change = gradients[2]))
+                    x_change = (-x_change * gradients[4]),
+                    y_change = gradients[3]))
                     .subscribe((_) => (this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change),
                     this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)));
                 return () => (normal(),
@@ -275,19 +263,19 @@ function pong() {
                 let moveUp = () => null;
                 let moveDown = () => null;
                 let stay = () => null;
-                moveDown = Observable.interval(0.1)
+                moveDown = Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cy') }))
                     .filter(({ x }) => Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) / 2 < Number(x))
                     .map((y) => ({ y: Number(this.paddle.attr("y")) + paddle_increment }))
                     .subscribe(({ y }) => (console.log("go down"),
                     this.paddle.attr("y", y.toString())));
-                moveUp = Observable.interval(0.1)
+                moveUp = Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cy') }))
                     .filter(({ x }) => Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) / 2 > Number(x))
                     .map((y) => ({ y: Number(this.paddle.attr("y")) - paddle_increment }))
                     .subscribe(({ y }) => (console.log("go up"),
                     this.paddle.attr("y", y.toString())));
-                stay = Observable.interval(0.1)
+                stay = Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cy') }))
                     .filter(({ x }) => Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) / 2 === Number(x))
                     .map((y) => ({ y: Number(this.paddle.attr("y")) }))
@@ -323,10 +311,10 @@ function pong() {
                     this.session_data.end_ball_movement(),
                     this.session_data.end_cpu_paddle_movement(),
                     this.session_data.current_ball.getBall()
-                        .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                        .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding + Number(this.session_data.current_ball.getBall().attr("r"))))
                         .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2),
                     this.game_data.round_started = false,
-                    this.game_data.start_direction = -1,
+                    this.game_data.start_direction = 1,
                     this.htmlPage.getGameBanner().textContent = "Left is Serving"));
                 scoreRight = Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ x: this.session_data.current_ball.getBall().attr('cx') }))
@@ -337,10 +325,10 @@ function pong() {
                     this.session_data.end_ball_movement(),
                     this.session_data.end_cpu_paddle_movement(),
                     this.session_data.current_ball.getBall()
-                        .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                        .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding + Number(this.session_data.current_ball.getBall().attr("r"))))
                         .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2),
                     this.game_data.round_started = false,
-                    this.game_data.start_direction = 1,
+                    this.game_data.start_direction = -1,
                     this.htmlPage.getGameBanner().textContent = "Right is Serving"));
                 gameWin = Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ x: this.session_data.current_ball.getBall().attr('cx') }))
@@ -485,72 +473,71 @@ function pong() {
                     .filter((s => !SessionData.game_data.round_started))
                     .subscribe(s => (SessionData.game_data.round_started = true,
                     SessionData.session_data.end_ball_movement = SessionData.session_data.current_ball.ball_movement(SessionData.game_data.start_direction)));
-                SessionData.session_data.gameplay_main = Observable.interval(10)
+                let scoreLeft = () => null;
+                let scoreRight = () => null;
+                let gameWin = () => null;
+                scoreLeft = Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
-                    .subscribe(({ x }) => {
-                    if (Number(x) < (Number(HTMLPage.svg.getAttribute("x")) - Number(SessionData.session_data.current_ball.getBall().attr("r")))) {
-                        GameSound.game_sound.fail.play();
-                        SessionData.game_data.score_right += 1;
-                        document.getElementById("score2").textContent = (SessionData.game_data.score_right).toString();
-                        SessionData.session_data.end_ball_movement();
-                        SessionData.game_data.round_started = false;
-                        SessionData.game_data.start_direction = -1;
-                        this.html_page.getPlayerTurn().textContent = "Right is Serving";
-                        SessionData.session_data.current_ball.getBall()
-                            .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-                            .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
-                        let res = {
-                            "status": 0,
-                            "game_id": this.GAMEID,
-                            "score_1": SessionData.game_data.score_left,
-                            "score_2": SessionData.game_data.score_right,
-                            "message": "Right is Serving"
-                        };
-                        Observable.toSocketIO(socket, "score_update", res);
-                    }
-                    else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x")) + Number(SessionData.session_data.current_ball.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width")))) {
-                        GameSound.game_sound.fail.play();
-                        SessionData.game_data.score_left += 1;
-                        document.getElementById("score1").textContent = (SessionData.game_data.score_left).toString();
-                        SessionData.session_data.end_ball_movement();
-                        SessionData.game_data.round_started = false;
-                        SessionData.game_data.start_direction = 1;
-                        this.html_page.getPlayerTurn().textContent = "Left is Serving";
-                        SessionData.session_data.current_ball.getBall()
-                            .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-                            .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2);
-                        let res = {
-                            "status": 0,
-                            "game_id": this.GAMEID,
-                            "score_1": SessionData.game_data.score_left,
-                            "score_2": SessionData.game_data.score_right,
-                            "message": "Left is Serving"
-                        };
-                        Observable.toSocketIO(socket, "score_update", res);
-                    }
-                    if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point) {
-                        document.getElementById("singleplayer_button").style.display = "none";
-                        document.getElementById("loader2").style.display = "block";
-                        SessionData.session_data.gameplay_main();
-                        mouseup();
-                        SessionData.session_data.end_ball_movement();
-                        SessionData.session_data.current_ball.getBall().attr("r", 0);
-                        this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds.";
-                        SessionData.game_data.score_left > SessionData.game_data.score_right ? this.html_page.getGameBanner().textContent = "Left Won the Game" : this.html_page.getGameBanner().textContent = "Right Won the Game";
-                        SessionData.game_data.round_started = true;
-                        let res = {
-                            "status": 1,
-                            "game_id": this.GAMEID,
-                            "score_1": SessionData.game_data.score_left,
-                            "score_2": SessionData.game_data.score_right,
-                            "message": "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
-                        };
-                        Observable.toSocketIO(socket, "score_update", res);
-                        Observable.toSocketIO(socket, "detach", this.GAMEID);
-                        const refresh = () => { window.location.reload(); };
-                        setTimeout(refresh, 5000);
-                    }
-                });
+                    .filter(({ x }) => (Number(x) < (Number(HTMLPage.svg.getAttribute("x")) - Number(SessionData.session_data.current_ball.getBall().attr("r")))))
+                    .subscribe(({ x }) => ((GameSound.game_sound.fail.play(),
+                    SessionData.game_data.score_right += 1,
+                    document.getElementById("score2").textContent = (SessionData.game_data.score_right).toString(),
+                    SessionData.session_data.end_ball_movement(),
+                    SessionData.game_data.round_started = false,
+                    SessionData.game_data.start_direction = -1,
+                    this.html_page.getPlayerTurn().textContent = "Right is Serving",
+                    SessionData.session_data.current_ball.getBall()
+                        .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                        .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2),
+                    Observable.toSocketIO(socket, "score_update", {
+                        "status": 0,
+                        "game_id": this.GAMEID,
+                        "score_1": SessionData.game_data.score_left,
+                        "score_2": SessionData.game_data.score_right,
+                        "message": "Right is Serving"
+                    }))));
+                scoreRight = Observable.interval(Settings.settings.game_speed)
+                    .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
+                    .filter(({ x }) => (Number(x) > (Number(HTMLPage.svg.getAttribute("x")) + Number(SessionData.session_data.current_ball.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width")))))
+                    .subscribe(({ x }) => (GameSound.game_sound.fail.play(),
+                    SessionData.game_data.score_left += 1,
+                    document.getElementById("score1").textContent = (SessionData.game_data.score_left).toString(),
+                    SessionData.session_data.end_ball_movement(),
+                    SessionData.game_data.round_started = false,
+                    SessionData.game_data.start_direction = 1,
+                    this.html_page.getPlayerTurn().textContent = "Left is Serving",
+                    SessionData.session_data.current_ball.getBall()
+                        .attr("cy", Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
+                        .attr("cx", Number(HTMLPage.svg.getAttribute("width")) / 2),
+                    Observable.toSocketIO(socket, "score_update", {
+                        "status": 0,
+                        "game_id": this.GAMEID,
+                        "score_1": SessionData.game_data.score_left,
+                        "score_2": SessionData.game_data.score_right,
+                        "message": "Left is Serving"
+                    })));
+                gameWin = Observable.interval(Settings.settings.game_speed)
+                    .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
+                    .filter(({ x }) => (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point))
+                    .subscribe(({ x }) => (document.getElementById("singleplayer_button").style.display = "none",
+                    document.getElementById("loader2").style.display = "block",
+                    SessionData.session_data.gameplay_main(),
+                    mouseup(),
+                    SessionData.session_data.end_ball_movement(),
+                    SessionData.session_data.current_ball.getBall().attr("r", 0),
+                    this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds.",
+                    SessionData.game_data.score_left > SessionData.game_data.score_right ? this.html_page.getGameBanner().textContent = "Left Won the Game" : this.html_page.getGameBanner().textContent = "Right Won the Game",
+                    SessionData.game_data.round_started = true,
+                    Observable.toSocketIO(socket, "score_update", {
+                        "status": 1,
+                        "game_id": this.GAMEID,
+                        "score_1": SessionData.game_data.score_left,
+                        "score_2": SessionData.game_data.score_right,
+                        "message": "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
+                    }),
+                    Observable.toSocketIO(socket, "detach", this.GAMEID),
+                    setTimeout(() => { window.location.reload(); }, 5000)));
+                SessionData.session_data.gameplay_main = () => (scoreLeft(), scoreRight(), gameWin());
             };
             this.createGame = () => {
                 const generateGameId = () => {
@@ -709,6 +696,7 @@ function pong() {
                                 document.getElementById("loader").style.display = "none";
                                 document.getElementById("player_wait_banner").style.display = "block";
                                 document.getElementById("player_wait_banner").textContent = "Both Players Connected. To Start the Game, the Host has to click on the table.";
+                                document.getElementById("player_turn").textContent = "Left is Serving";
                                 this.startMultiplayerGame();
                                 if (!socket.sentMydata) {
                                     Observable.toSocketIO(socket, "stop_searching_for_players");
