@@ -63,7 +63,7 @@ class Settings {
     "game_speed" : 1,                               // Initializing the game speed as 1, this is the rate in which all of the Observable.intervals will fire data 
     "ball_speed" : 2,                               // Initializing the ball_speed as 2, this is number of pixels the ball changes every game_speed milliseconds
     "player_side" : "left",                         // Initializing the player_side as left, so that by defalut the user will be initlized to the left
-    "game_point":3,                                // Initializing the game point as 11, this is the point at which the game ends
+    "game_point":11,                                // Initializing the game point as 11, this is the point at which the game ends
     "paddle_height":60,                             // Initializing the paddle height to 60px by default
     "dash_gap": 20,                                 // Initializing the dash_gap in the pong table to 20 by default
     "padding" : 50                                  // Initializing the padding around the box(i.e the buffer area for the mouse to move to)
@@ -992,6 +992,60 @@ class HTMLPage {
   }
 
   /**
+   * This function is used to validate the input entered by the user
+   */
+  validateInput = () => {
+
+    // Creating a response object
+    let res : {
+      code : Number,
+      message: String
+    }={
+      code : 200,
+      message : "Undefined"
+    }
+
+    // Getting in all the input variables
+    let inputs : {
+      tableHeight : Number,
+      tableWidth : Number,
+      ballSpeed: Number,
+      frameRate: Number,
+      gamePoint: Number,
+      paddleHeight: Number,
+      dashGap : Number,
+      padding: Number
+    }={
+      tableHeight : Number((<HTMLInputElement>document.getElementById("theight"))!.value),
+      tableWidth : Number((<HTMLInputElement>document.getElementById("twidth"))!.value),
+      ballSpeed: Number((<HTMLInputElement>document.getElementById("ball_speed"))!.value),
+      frameRate: Number((<HTMLInputElement>document.getElementById("frame_rate"))!.value),
+      gamePoint: Number((<HTMLInputElement>document.getElementById("game_point"))!.value),
+      paddleHeight: Number((<HTMLInputElement>document.getElementById("paddle_height"))!.value),
+      dashGap : Number((<HTMLInputElement>document.getElementById("dash_gap"))!.value),
+      padding: Number((<HTMLInputElement>document.getElementById("padding"))!.value)
+    };
+  
+
+    // Checking all the inputs are in the correct range
+    (inputs.tableHeight >= 300 && inputs.tableHeight <= 1000)? (res.code == 200)?(res.code = 200,res.message = "Succesful"):undefined:(res.code = 404, res.message = "Table Height not in range (300 - 1000)");
+    (inputs.tableWidth >= 300 && inputs.tableWidth <= 1000)? (res.code == 200)?(res.code = 200,res.message = "Succesful"):undefined:(res.code = 404, res.message = "Table Width not in range (300 - 1000)");
+    (inputs.ballSpeed >= 0.1 && inputs.ballSpeed <= 5)? (res.code == 200)?(res.code = 200,res.message = "Succesful"):undefined:(res.code = 404, res.message = "Difficulty not in range (0.1 - 5)");
+    (inputs.frameRate >= 1 && inputs.frameRate <= 10)? (res.code == 200)?(res.code = 200,res.message = "Succesful"):undefined:(res.code = 404, res.message = "Frame Rate not in range (1 - 10)");
+    (inputs.gamePoint >= 2 && inputs.gamePoint <= 42)? (res.code == 200)?(res.code = 200,res.message = "Succesful"):undefined:(res.code = 404, res.message = "Game Point not in range (2 - 42)");
+    (inputs.paddleHeight >= Number(inputs.tableHeight)*0.1 && inputs.paddleHeight <= Number(inputs.tableHeight)*0.8)? (res.code == 200)?(res.code = 200,res.message = "Succesful"):undefined:(res.code = 404, res.message = "Paddle Height not in range (10% of Table Height - 80% of Table Height) ");
+    (inputs.dashGap >= 10 && inputs.dashGap <= 40)? (res.code == 200)?(res.code = 200,res.message = "Succesful"):undefined:(res.code = 404, res.message = "Dash Gap not in range (10-40)");
+    (inputs.padding >= 30 && inputs.padding <= 100)?(res.code == 200)?(res.code = 200,res.message = "Succesful"):undefined:(res.code = 404, res.message = "Padding not in range (30 - 100)");
+
+    // Return the result
+    return res
+  
+  }
+
+
+
+
+  /**
    * Function used to update the settings in the game
    */
   update = ():void => {
@@ -1004,6 +1058,12 @@ class HTMLPage {
       pongTable.move_paddle(SessionData.session_data.current_paddle!)
     }
 
+    // Validate the User Input
+    let response = this.validateInput();
+
+    // If the validation is not correct then throw an alert with the error message
+    (response.code === 404)?alert(response.message):
+    (
     //  Prompting the user to confirm to update the settings
     confirm("THE GAME IS STILL IN BETA. If you wish to update the settings, do at your own RISK. The game may crash on some combinations. If it crashes you will have to reload the page.  Do you wish to continue? ")?
     (
@@ -1031,6 +1091,8 @@ class HTMLPage {
     :
     // If user says no, then rivert all the changes back
     this.init()
+
+    )
 
   }
 

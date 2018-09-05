@@ -25,7 +25,7 @@ function pong() {
         "game_speed": 1,
         "ball_speed": 2,
         "player_side": "left",
-        "game_point": 3,
+        "game_point": 11,
         "paddle_height": 60,
         "dash_gap": 20,
         "padding": 50
@@ -371,29 +371,56 @@ function pong() {
                     document.getElementById("dash_gap").value = Settings.settings.dash_gap.toString(),
                     document.getElementById("padding").value = Settings.settings.padding.toString();
             };
+            this.validateInput = () => {
+                let res = {
+                    code: 200,
+                    message: "Undefined"
+                };
+                let inputs = {
+                    tableHeight: Number(document.getElementById("theight").value),
+                    tableWidth: Number(document.getElementById("twidth").value),
+                    ballSpeed: Number(document.getElementById("ball_speed").value),
+                    frameRate: Number(document.getElementById("frame_rate").value),
+                    gamePoint: Number(document.getElementById("game_point").value),
+                    paddleHeight: Number(document.getElementById("paddle_height").value),
+                    dashGap: Number(document.getElementById("dash_gap").value),
+                    padding: Number(document.getElementById("padding").value)
+                };
+                (inputs.tableHeight >= 300 && inputs.tableHeight <= 1000) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Table Height not in range (300 - 1000)");
+                (inputs.tableWidth >= 300 && inputs.tableWidth <= 1000) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Table Width not in range (300 - 1000)");
+                (inputs.ballSpeed >= 0.1 && inputs.ballSpeed <= 5) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Difficulty not in range (0.1 - 5)");
+                (inputs.frameRate >= 1 && inputs.frameRate <= 10) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Frame Rate not in range (1 - 10)");
+                (inputs.gamePoint >= 2 && inputs.gamePoint <= 42) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Game Point not in range (2 - 42)");
+                (inputs.paddleHeight >= Number(inputs.tableHeight) * 0.1 && inputs.paddleHeight <= Number(inputs.tableHeight) * 0.8) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Paddle Height not in range (10% of Table Height - 80% of Table Height) ");
+                (inputs.dashGap >= 10 && inputs.dashGap <= 40) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Dash Gap not in range (10-40)");
+                (inputs.padding >= 30 && inputs.padding <= 100) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Padding not in range (30 - 100)");
+                return res;
+            };
             this.update = () => {
                 let svg = document.getElementById("canvas");
                 const updategame = () => {
                     let pongTable = new PongTable(HTMLPage.svg);
                     pongTable.move_paddle(SessionData.session_data.current_paddle);
                 };
-                confirm("THE GAME IS STILL IN BETA. If you wish to update the settings, do at your own RISK. The game may crash on some combinations. If it crashes you will have to reload the page.  Do you wish to continue? ") ?
-                    (document.getElementById("left_side").checked ?
-                        Settings.settings.player_side = "left" : Settings.settings.player_side = "right",
-                        Settings.settings.table_height = Number(document.getElementById("theight").value),
-                        Settings.settings.table_width = Number(document.getElementById("twidth").value),
-                        Settings.settings.ball_speed = Number(document.getElementById("ball_speed").value),
-                        Settings.settings.game_speed = Number(document.getElementById("frame_rate").value),
-                        Settings.settings.game_point = Number(document.getElementById("game_point").value),
-                        Settings.settings.paddle_height = Number(document.getElementById("paddle_height").value),
-                        Settings.settings.dash_gap = Number(document.getElementById("dash_gap").value),
-                        Settings.settings.padding = Number(document.getElementById("padding").value),
-                        HTMLPage.clearAllChildren(svg),
-                        document.getElementById("canvas").setAttribute("height", Settings.settings.table_height.toString()),
-                        document.getElementById("canvas").setAttribute("width", Settings.settings.table_width.toString()),
-                        updategame())
-                    :
-                        this.init();
+                let response = this.validateInput();
+                (response.code === 404) ? alert(response.message) :
+                    (confirm("THE GAME IS STILL IN BETA. If you wish to update the settings, do at your own RISK. The game may crash on some combinations. If it crashes you will have to reload the page.  Do you wish to continue? ") ?
+                        (document.getElementById("left_side").checked ?
+                            Settings.settings.player_side = "left" : Settings.settings.player_side = "right",
+                            Settings.settings.table_height = Number(document.getElementById("theight").value),
+                            Settings.settings.table_width = Number(document.getElementById("twidth").value),
+                            Settings.settings.ball_speed = Number(document.getElementById("ball_speed").value),
+                            Settings.settings.game_speed = Number(document.getElementById("frame_rate").value),
+                            Settings.settings.game_point = Number(document.getElementById("game_point").value),
+                            Settings.settings.paddle_height = Number(document.getElementById("paddle_height").value),
+                            Settings.settings.dash_gap = Number(document.getElementById("dash_gap").value),
+                            Settings.settings.padding = Number(document.getElementById("padding").value),
+                            HTMLPage.clearAllChildren(svg),
+                            document.getElementById("canvas").setAttribute("height", Settings.settings.table_height.toString()),
+                            document.getElementById("canvas").setAttribute("width", Settings.settings.table_width.toString()),
+                            updategame())
+                        :
+                            this.init());
             };
             this.start_game = () => {
                 SessionData.session_data.gameplay_main ?
