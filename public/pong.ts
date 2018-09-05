@@ -259,192 +259,162 @@ class Ball {
                 this.ball.attr('cy', y))
           );
 
-          // If the ball collide with the 
+          // If the ball collide with the bottom edge of the svg, it will turn the ball around
           bottomSide = observableFromBall
-              .filter(({x,y}) => (Number(y)>Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.ball.attr("r"))))
+              .filter(({y}) => (Number(y)>Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.ball.attr("r"))))
               .map((_) => (
                 (GameSound.game_sound.collision.play(),
                 // Negating the y change value
                 y_change = (-y_change))))
-              // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
               .subscribe((_)=>(
                 this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
                 this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
           );
 
-          // top
+          // If the ball collide with the top edge of the svg, it will turn the ball around
           topSide = observableFromBall
-              .filter(({x,y}) => Number(y)<Settings.settings.padding+Number(this.ball.attr("r")))
+              .filter(({y}) => Number(y)<Settings.settings.padding+Number(this.ball.attr("r")))
               .map((_) => (
                 (GameSound.game_sound.collision.play(),
                 // Negating the y change value
                 y_change = (-y_change))))
-              // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
               .subscribe((_)=>(
                 this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
                 this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
           );
 
-          // paddle top
+          // If the ball collides with the paddle then check whether it collides with the top 5% of the paddle
           currentPaddleTop = observableFromBallAfterCollisionCurrentPaddle
-              .filter(({x,y}) => 
-              Number(y) <=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))*0.05   
-              )
+              .filter(({y}) => 
+              Number(y) <=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))*0.05   )
               .map((_) => (
                 GameSound.game_sound.collision.play(),
                 x_change = (-x_change*gradients[4]),
                 y_change = gradients[3]
               ))
-              // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
               .subscribe((_)=>(
                 this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
                 this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
           );
 
-          // paddle top
+          // If the ball collides with the paddle then check whether it collides with the top 40% of the paddle
           currentPaddleTopMiddle = observableFromBallAfterCollisionCurrentPaddle
-          .filter(({x,y}) => 
-          (Number(y) >  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))*0.05) &&
-          (Number(y) <  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
-          )
+          .filter(({y}) => (Number(y) >  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))*0.05))
+          .filter(({y}) => (Number(y) <  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05))
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change),
             y_change = gradients[1]
           ))
-          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
             this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-
+          // If the ball collides with the paddle then check whether it collides with the middle 10% of the paddle
           currentPaddleMiddle = observableFromBallAfterCollisionCurrentPaddle
-          .filter(({x,y}) => 
-          (Number(y) >=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05) &&
-          (Number(y) <=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  +  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
-          )
+          .filter(({y}) => (Number(y) >=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05))
+          .filter(({y}) => (Number(y) <=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  +  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05))
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change),
             y_change = gradients[Math.floor((Math.random() * 3))]
           ))
-          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
             this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-
+          // If the ball collides with the paddle then check whether it collides with the bottom 40% of the paddle
           currentPaddleBottomMiddle = observableFromBallAfterCollisionCurrentPaddle
-          .filter(({x,y}) => 
-          (Number(y) >  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  +  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05) &&
-          (Number(y) <  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
-          )
+          .filter(({y}) => (Number(y) >  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))/2  +  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05))
+          .filter(({y}) => (Number(y) <  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05))
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change),
             y_change = gradients[2]
           ))
-          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
             this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-
+          // If the ball collides with the paddle then check whether it collides with the bottom 5% of the paddle
           currentPaddleBottom = observableFromBallAfterCollisionCurrentPaddle
-          .filter(({x,y}) => 
-          (Number(y) >=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05)
-          )
+          .filter(({y}) => (Number(y) >=  Number(SessionData.session_data.current_paddle!.attr("y")) + Number(SessionData.session_data.current_paddle!.attr("height"))  -  Number(SessionData.session_data.current_paddle!.attr("height"))*0.05))
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change*gradients[4]),
             y_change = gradients[4]
           ))
-          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
             this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
 
-          // paddle top
+          // If the ball collides with the paddle then check whether it collides with the top 5% of the paddle
           opponentPaddleTop = observableFromBallAfterCollisionOpponentPaddle
-              .filter(({x,y}) => 
-              Number(y) <=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05   
-              )
+              .filter(({y}) => Number(y) <=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
               .map((_) => (
                 GameSound.game_sound.collision.play(),
                 x_change = (-x_change*gradients[4]),
                 y_change = gradients[3]
               ))
-              // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
               .subscribe((_)=>(
                 this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
                 this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change))
           );
 
-          // paddle top
+          // If the ball collides with the paddle then check whether it collides with the top 40% of the paddle
           opponentPaddleTopMiddle = observableFromBallAfterCollisionOpponentPaddle
-          .filter(({x,y}) => 
-          (Number(y) >  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05) &&
-          (Number(y) <  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
-          )
+          .filter(({y}) => (Number(y) >  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05))
+          .filter(({y}) => (Number(y) <  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05))
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change),
             y_change = gradients[1]
           ))
-          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
             this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-
+          // If the ball collides with the paddle then check whether it collides with the middle 10% of the paddle
           opponentPaddleMiddle = observableFromBallAfterCollisionOpponentPaddle
-          .filter(({x,y}) => 
-          (Number(y) >=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05) &&
-          (Number(y) <=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  +  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
-          )
+          .filter(({y}) => (Number(y) >=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05))
+          .filter(({y}) => (Number(y) <=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  +  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05))
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change),
             y_change = gradients[Math.floor((Math.random() * 3))]
           ))
-          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
             this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-
+          // If the ball collides with the paddle then check whether it collides with the bottom 40% of the paddle
           opponentPaddleBottomMiddle = observableFromBallAfterCollisionOpponentPaddle
-          .filter(({x,y}) => 
-          (Number(y) >  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  +  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05) &&
-          (Number(y) <  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
-          )
+          .filter(({y}) => (Number(y) >  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))/2  +  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05))
+          .filter(({y}) => (Number(y) <  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05))
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change),
             y_change = gradients[2]
           ))
-          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
             this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-
+        // If the ball collides with the paddle then check whether it collides with the bottom 5% of the paddle
         opponentPaddleBottom = observableFromBallAfterCollisionOpponentPaddle
           .filter(({x,y}) => 
-          (Number(y) >=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05)
-          )
+          (Number(y) >=  Number(SessionData.session_data.opponent_paddle!.attr("y")) + Number(SessionData.session_data.opponent_paddle!.attr("height"))  -  Number(SessionData.session_data.opponent_paddle!.attr("height"))*0.05))
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change*gradients[4]),
             y_change = gradients[4]
           ))
-          // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
             this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change ),
             this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)))
 
-          
+          // Return all the unsubscribe methods of all the observables related to ball movements
           return () => (
             normal(),
             bottomSide(),
@@ -491,101 +461,46 @@ class CPUPaddleMovement{
     // since it is updating slower than the ball
     const paddle_increment = Settings.settings.ball_speed
 
-    // /**
-    //  * Function used to increament the paddle according to the ball movement
-    //  */
-    // increment = (y:number) =>
-    // {
-    //   // Check If the center of the paddle is less than the center of the ball
-    //   if (Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 <y){
-    //     // if the center of the paddle is less than the center of the ball then increase the 
-    //     // paddle y value inorder for the paddle to go down
-    //     return Number(this.paddle!.attr("y")) + paddle_increment 
-    //   // Check If the center of the paddle is greater than the center of the ball
-    //   }else if (Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 >y){
-    //     // if the center of the paddle is greater than the center of the ball then decrease the 
-    //     // paddle y value inorder for the paddle to go up
-    //     return Number(this.paddle!.attr("y")) - paddle_increment
-    //   }else{
-    //     // If the paddle center is equal to the ball center, then the paddle attribute is not changed
-    //     return Number(this.paddle!.attr("y")) 
-    //   }
-    // }
-  
+    // Defining the functions to unsubscribe the observables after asigning them
     let moveUp:()=>void = ()=>null
     let moveDown:()=>void = ()=>null
     let stay:()=>void = ()=>null
 
     
-    // Using an observable to update the AI every (decided by the user) milliseconds
-    // return Observable.interval(0.1)
-          // Getting the y axis of the ball and mapping it to an object {y}
-          // .map(s=>(
-          //   {y:SessionData.session_data.current_ball!.getBall().attr('cy') }))
-         
-
-          // Getting the paddle increment to change the location of the paddle
-          // .map(({y})=>(
-          //   {y:increment(Number(y))}))
-          
-      
+            // Observable to update the AI Paddle, to move down if the ball location is below than the paddle center   
             moveDown = Observable.interval(Settings.settings.game_speed)
-                    .map(s=>(
+                    .map(_=>(
                       {x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
                     
                     .filter(
                       ({x}) => Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 < Number(x))
                     .filter((_) => !(Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height")) > Settings.settings.table_height-Settings.settings.padding))
                     .map(
-                      (y)=>( {y : Number(this.paddle!.attr("y")) + paddle_increment })
-                      
-                    )
+                      (_)=>( {y : Number(this.paddle!.attr("y")) + paddle_increment }) )
                     .subscribe(({y})=>(
                       console.log("go down"),
                       this.paddle!.attr("y",y.toString())))
                   
-
+            // Observable to update the AI Paddle, to move up if the ball location is above than the paddle center   
             moveUp = Observable.interval(Settings.settings.game_speed)
-                    .map(s=>(
-                      {x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
-                    
-                    .filter(
-                      ({x}) => Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 > Number(x))
+                    .map(_=>({x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
+                    .filter(({x}) => Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 > Number(x))
                     .filter((_) => !(Number(this.paddle!.attr("y")) < Settings.settings.padding))
-                    .map(
-                      (y)=>( {y : Number(this.paddle!.attr("y")) - paddle_increment })
-                    )
+                    .map((_)=>( {y : Number(this.paddle!.attr("y")) - paddle_increment }))
                     .subscribe(({y})=>(
                       console.log("go up"),
                       this.paddle!.attr("y",y.toString())))
                   
-                      
-      
+            // Observable to update the AI Paddle, to move up if the ball location is the same as the paddle center  
             stay = Observable.interval(Settings.settings.game_speed)
-                    .map(s=>(
-                      {x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
-                    
-                    .filter(
-                      ({x}) => Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 === Number(x))
-                    .map(
-                      (y)=>( {y : Number(this.paddle!.attr("y"))})
-                    )
-
+                    .map(_=>({x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
+                    .filter(({x}) => Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 === Number(x))
+                    .map((_)=>( {y : Number(this.paddle!.attr("y"))}))
                     .subscribe(({y})=>(
                       console.log("eq"),
                       this.paddle!.attr("y",y.toString())))
                   
-          
-          
-           // Filtering the values that are greater than the limits of the canvas area in order to prevent the AI from 
-          // going out of bounds
-          // .filter((y) => !(Number(y) <= (Number(HTMLPage.svg.getAttribute("height"))) - (Number(this.paddle!.attr("height"))/2) - Settings.settings.padding) && !(Number(y) >= Settings.settings.padding))  
-          
-          // Changing the y axis of the paddle
-          // .subscribe((h)=>(
-          //   console.log("ff"),
-          //   dd(),bb(),cc()))
-
+          // Returning a function with all the unsubscribe function to stop the paddle movement
           return () => (moveUp(),moveDown(),stay())
     }
 
