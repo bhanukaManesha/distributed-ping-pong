@@ -230,12 +230,14 @@ function pong() {
                 moveDown = Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cy') }))
                     .filter(({ x }) => Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) / 2 < Number(x))
+                    .filter((_) => !(Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) > Settings.settings.table_height - Settings.settings.padding))
                     .map((y) => ({ y: Number(this.paddle.attr("y")) + paddle_increment }))
                     .subscribe(({ y }) => (console.log("go down"),
                     this.paddle.attr("y", y.toString())));
                 moveUp = Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cy') }))
                     .filter(({ x }) => Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) / 2 > Number(x))
+                    .filter((_) => !(Number(this.paddle.attr("y")) < Settings.settings.padding))
                     .map((y) => ({ y: Number(this.paddle.attr("y")) - paddle_increment }))
                     .subscribe(({ y }) => (console.log("go up"),
                     this.paddle.attr("y", y.toString())));
@@ -355,7 +357,7 @@ function pong() {
                 (inputs.ballSpeed >= 0.1 && inputs.ballSpeed <= 5) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Difficulty not in range (0.1 - 5)");
                 (inputs.frameRate >= 1 && inputs.frameRate <= 10) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Frame Rate not in range (1 - 10)");
                 (inputs.gamePoint >= 2 && inputs.gamePoint <= 42) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Game Point not in range (2 - 42)");
-                (inputs.paddleHeight >= Number(inputs.tableHeight) * 0.1 && inputs.paddleHeight <= Number(inputs.tableHeight) * 0.8) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Paddle Height not in range (10% of Table Height - 80% of Table Height) ");
+                (inputs.paddleHeight >= Number(inputs.tableHeight) * 0.1 && inputs.paddleHeight <= Number(inputs.tableHeight) * 0.5) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Paddle Height not in range (10% of Table Height - 80% of Table Height) ");
                 (inputs.dashGap >= 10 && inputs.dashGap <= 40) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Dash Gap not in range (10-40)");
                 (inputs.padding >= 30 && inputs.padding <= 100) ? (res.code == 200) ? (res.code = 200, res.message = "Succesful") : undefined : (res.code = 404, res.message = "Padding not in range (30 - 100)");
                 return res;
