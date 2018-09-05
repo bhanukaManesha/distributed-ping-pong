@@ -1,41 +1,5 @@
 "use strict";
 function pong() {
-    class SessionData {
-        constructor() { }
-    }
-    SessionData.session_data = {
-        current_paddle: undefined,
-        opponent_paddle: undefined,
-        current_ball: undefined,
-        gameplay_main: () => null,
-        end_cpu_paddle_movement: () => null,
-        end_ball_movement: () => null
-    };
-    SessionData.game_data = {
-        "score_left": 0,
-        "score_right": 0,
-        "round_started": false,
-        "start_direction": 1
-    };
-    class Settings {
-    }
-    Settings.settings = {
-        "table_height": 600,
-        "table_width": 600,
-        "game_speed": 10,
-        "ball_speed": 2,
-        "player_side": "left",
-        "game_point": 11,
-        "paddle_height": 60,
-        "dash_gap": 20,
-        "padding": 50
-    };
-    class GameSound {
-    }
-    GameSound.game_sound = {
-        collision: new Audio(),
-        fail: new Audio()
-    };
     class PongTable {
         constructor(svg) {
             this.paddle = null;
@@ -471,6 +435,42 @@ function pong() {
             svg.removeChild(svg.firstChild);
             count--;
         }
+    };
+    class SessionData {
+        constructor() { }
+    }
+    SessionData.session_data = {
+        current_paddle: undefined,
+        opponent_paddle: undefined,
+        current_ball: undefined,
+        gameplay_main: () => null,
+        end_cpu_paddle_movement: () => null,
+        end_ball_movement: () => null
+    };
+    SessionData.game_data = {
+        "score_left": 0,
+        "score_right": 0,
+        "round_started": false,
+        "start_direction": 1
+    };
+    class Settings {
+    }
+    Settings.settings = {
+        "table_height": 600,
+        "table_width": 600,
+        "game_speed": 8,
+        "ball_speed": 2,
+        "player_side": "left",
+        "game_point": 11,
+        "paddle_height": 60,
+        "dash_gap": 20,
+        "padding": 50
+    };
+    class GameSound {
+    }
+    GameSound.game_sound = {
+        collision: new Audio(),
+        fail: new Audio()
     };
     class Multiplayer {
         constructor(htmlPage) {

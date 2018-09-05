@@ -63,13 +63,6 @@ i {
 
 
 .startbutton {
-    /* background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, black), color-stop(1, black));
-    background:-moz-linear-gradient(top, black 5%, black 100%);
-    background:-webkit-linear-gradient(top, black 5%, black 100%);
-    background:-o-linear-gradient(top, black 5%, black 100%);
-    background:-ms-linear-gradient(top, black 5%, black 100%);
-    background:linear-gradient(to bottom, black 5%, black 100%);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='black', endColorstr='black',GradientType=0); */
     background-color:black;
     -moz-border-radius:25px;
     -webkit-border-radius:25px;
@@ -87,12 +80,6 @@ i {
 
 }
 .startbutton:hover {
-    /* background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, black), color-stop(1, black));
-    background:-moz-linear-gradient(top, black 5%, black 100%);
-    background:-webkit-linear-gradient(top, black 5%, black 100%);
-    background:-o-linear-gradient(top, black 5%, black 100%);
-    background:-ms-linear-gradient(top, black 5%, black 100%);
-    background:linear-gradient(to bottom, black 5%, black 100%); */
     filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='black', endColorstr='black',GradientType=0);
     background-color:white;
     color:black;
@@ -149,7 +136,7 @@ i {
     border-top: 16px solid white;
     width: 120px;
     height: 120px;
-    -webkit-animation: spin 2s linear infinite; /* Safari */
+    -webkit-animation: spin 2s linear infinite;
     animation: spin 2s linear infinite;
   }
 
@@ -161,7 +148,7 @@ i {
     width: 60px;
     height: 60px;
     display: none;
-    -webkit-animation: spin 2s linear infinite; /* Safari */
+    -webkit-animation: spin 2s linear infinite;
     animation: spin 2s linear infinite;
   }
 

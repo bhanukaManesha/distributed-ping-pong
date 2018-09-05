@@ -13,74 +13,6 @@ function pong() {
   // Explain which ideas you have used ideas from the lectures to 
   // create reusable, generic functions.
 
-
-/**
- * Static Class to maintain all the data that is needed through out the game.
- * These two items are used to maintain the flow of the game
- */
-class SessionData {
-
-  // Stores the svg element data per session and the data for ending the relavant observables
-  static session_data : {
-    current_paddle :Elem | undefined,               // Stores a reference to the left paddle
-    opponent_paddle :Elem | undefined,              // Stores a reference to the reight paddle
-    current_ball : Ball | undefined,                // Stores a reference to the current ball
-    gameplay_main:()=>void ,                        // Stores a reference to the unsubscribe method of the game_play observable
-    end_cpu_paddle_movement:()=>void ,              // Stores a reference to the unsubscribe method of the AI Paddle observable
-    end_ball_movement:()=>void                      // Stores a reference to the unsubscribe method of the ball observable
-
-  } = {
-    // Assigning default values to initialize the variables
-    current_paddle :undefined,                      // Setting the default value for current_paddle as undefined
-    opponent_paddle :undefined,                     // Setting the default value for opponent_paddle as undefined
-    current_ball : undefined ,                      // Setting the default value for current_ball as undefined
-    gameplay_main:() => null,                       // Setting the default value for gameplay_main as a function that returns null
-    end_cpu_paddle_movement:() => null,             // Setting the default value for end_cpu_paddle_movement as a function that returns null
-    end_ball_movement:() => null                    // Setting the default value for end_ball_movement as a function that returns null
-  }
-
-  // Stores the game data per session
-  static game_data = {
-    "score_left":0,                                 // Initializing the score left as 0  
-    "score_right":0,                                // Initializing the score right as 0  
-    "round_started":false,                          // Initializing the round started as false  
-    "start_direction":1                             // Initializing the start direction as so that left will be serving always  
-  }
-
-  // Empty Constructor
-  constructor() {}
-
-}
-
-/**
- * Static Class to store the user entered settings to be used in the game.
- * They are set to default values
- */
-class Settings {
-  static settings = {
-    "table_height":600,                             // Initializing the table height as 600px
-    "table_width":600,                              // Initializing the table width as 600px
-    "game_speed" : 10,                               // Initializing the game speed as 1, this is the rate in which all of the Observable.intervals will fire data 
-    "ball_speed" : 2,                               // Initializing the ball_speed as 2, this is number of pixels the ball changes every game_speed milliseconds
-    "player_side" : "left",                         // Initializing the player_side as left, so that by defalut the user will be initlized to the left
-    "game_point":11,                                // Initializing the game point as 11, this is the point at which the game ends
-    "paddle_height":60,                             // Initializing the paddle height to 60px by default
-    "dash_gap": 20,                                 // Initializing the dash_gap in the pong table to 20 by default
-    "padding" : 50                                  // Initializing the padding around the box(i.e the buffer area for the mouse to move to)
-  }
-}
-
-/**
- * Static Class to store the refrence to the Game Sound Files
- * These sound files are used for paddle collision and after each round
- */
-class GameSound {
-  static game_sound = {
-    collision:new Audio(),                          // Initialzing the collison audio to new HTMLAudio elements
-    fail:new Audio()                                // Initialzing the fail audio to new HTMLAudio elements
-  }
-}
-
 /**
  * This class is used to generate the pong table on the svg canvas
  */
@@ -1156,6 +1088,73 @@ class HTMLPage {
     return this.player_turn
 }
 
+}
+
+/**
+ * Static Class to maintain all the data that is needed through out the game.
+ * These two items are used to maintain the flow of the game
+ */
+class SessionData {
+
+  // Stores the svg element data per session and the data for ending the relavant observables
+  static session_data : {
+    current_paddle :Elem | undefined,               // Stores a reference to the left paddle
+    opponent_paddle :Elem | undefined,              // Stores a reference to the reight paddle
+    current_ball : Ball | undefined,                // Stores a reference to the current ball
+    gameplay_main:()=>void ,                        // Stores a reference to the unsubscribe method of the game_play observable
+    end_cpu_paddle_movement:()=>void ,              // Stores a reference to the unsubscribe method of the AI Paddle observable
+    end_ball_movement:()=>void                      // Stores a reference to the unsubscribe method of the ball observable
+
+  } = {
+    // Assigning default values to initialize the variables
+    current_paddle :undefined,                      // Setting the default value for current_paddle as undefined
+    opponent_paddle :undefined,                     // Setting the default value for opponent_paddle as undefined
+    current_ball : undefined ,                      // Setting the default value for current_ball as undefined
+    gameplay_main:() => null,                       // Setting the default value for gameplay_main as a function that returns null
+    end_cpu_paddle_movement:() => null,             // Setting the default value for end_cpu_paddle_movement as a function that returns null
+    end_ball_movement:() => null                    // Setting the default value for end_ball_movement as a function that returns null
+  }
+
+  // Stores the game data per session
+  static game_data = {
+    "score_left":0,                                 // Initializing the score left as 0  
+    "score_right":0,                                // Initializing the score right as 0  
+    "round_started":false,                          // Initializing the round started as false  
+    "start_direction":1                             // Initializing the start direction as so that left will be serving always  
+  }
+
+  // Empty Constructor
+  constructor() {}
+
+}
+
+/**
+ * Static Class to store the user entered settings to be used in the game.
+ * They are set to default values
+ */
+class Settings {
+  static settings = {
+    "table_height":600,                             // Initializing the table height as 600px
+    "table_width":600,                              // Initializing the table width as 600px
+    "game_speed" :8,                               // Initializing the game speed as 1, this is the rate in which all of the Observable.intervals will fire data 
+    "ball_speed" : 2,                               // Initializing the ball_speed as 2, this is number of pixels the ball changes every game_speed milliseconds
+    "player_side" : "left",                         // Initializing the player_side as left, so that by defalut the user will be initlized to the left
+    "game_point":11,                                // Initializing the game point as 11, this is the point at which the game ends
+    "paddle_height":60,                             // Initializing the paddle height to 60px by default
+    "dash_gap": 20,                                 // Initializing the dash_gap in the pong table to 20 by default
+    "padding" : 50                                  // Initializing the padding around the box(i.e the buffer area for the mouse to move to)
+  }
+}
+
+/**
+ * Static Class to store the refrence to the Game Sound Files
+ * These sound files are used for paddle collision and after each round
+ */
+class GameSound {
+  static game_sound = {
+    collision:new Audio(),                          // Initialzing the collison audio to new HTMLAudio elements
+    fail:new Audio()                                // Initialzing the fail audio to new HTMLAudio elements
+  }
 }
 
 

@@ -115,9 +115,9 @@
         </div>
     </div>
 
-    <br><br><br>
-<hr>
-<br><br>
+        <br><br><br>
+        <hr>
+        <br><br>
     <div id="singleplayer" style="display: none">
 
             <h1 style="text-align:center">
@@ -127,7 +127,6 @@
             </div>
 
     <div id="multiplayer" style="display: block">
-
     <h1 style="text-align:center">
         Multiplayer
     </h1>
@@ -136,26 +135,9 @@
     <input id="join_game_id" type="text" placeholder="Please enter Game ID.." style="color:white;border:1px solid white;;text-align:center;display:block;width:40%;margin:auto;">
     <br><br>
     <button class="startbutton" id="joingame">Join Game</button>
-
     </div>
-   
     </body>
-    <script>
-
-    function spinIcon() {
-                let x = document.getElementById("settings");
-                let arrow = document.getElementById("arrow");
-                if (x.style.display === "none") {
-                        arrow.style.transform = "rotate(-135deg)"
-                        arrow.style.webkitTransform = "rotate(-135deg)"
-                        x.style.display = "block";
-                } else {
-                    x.style.display = "none";
-                    arrow.style.transform = "rotate(45deg)"
-                    arrow.style.webkitTransform = "rotate(45deg)"
-                }
-            }
-    </script>
+    <script src="custom.js"></script>
     <script src="svgelement.js"></script>
     <script src="observable.js"></script>
     <script src="pong.js"></script>
