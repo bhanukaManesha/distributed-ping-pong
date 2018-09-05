@@ -812,7 +812,7 @@ class HTMLPage {
    */
   update = ():void => {
     // Getting a reference to the svg 
-    let svg = document.getElementById("canvas")!,
+    let svg = document.getElementById("canvas")!
     
     // Function to update the game and restart it 
     const updategame = () => {
@@ -1222,7 +1222,6 @@ class Multiplayer {
         SessionData.game_data.round_started = true
         // Sending the detach request to the server
         Observable.toSocketIO(socket,"detach",this.GAMEID)
-        // io().emit("detach",this.GAMEID)
         // Create a function to refresh the page
         const refresh = () => {window.location.reload()}
         // Waiting 5 seconds and then refreshing the page
@@ -1378,9 +1377,6 @@ class Multiplayer {
               // Sending the detach signal to the server
               Observable.toSocketIO(socket,"detach",this.GAMEID),
 
-              // io().emit("score_update",res)
-              // io().emit("detach",this.GAMEID)
-
               // Create a function to refresh the page and 
               // Waiting 5 seconds and then refreshing the page
               setTimeout(() => {window.location.reload()},5000)
@@ -1422,7 +1418,6 @@ private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
           document.getElementById("player_wait_banner")!.textContent! =  ""
           // Sending the signal to the server to stop searching for players
           Observable.toSocketIO(socket,"stop_searching_for_players",this.GAMEID)
-          // socket.emit("stop_searching_for_players",this.GAMEID)
           
           // Setting the GAMEID as null
           this.GAMEID = null
@@ -1431,9 +1426,6 @@ private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
 
           // Sending the detach signal to the server
           Observable.toSocketIO(socket,"detach",this.GAMEID)
-
-          // io().emit("score_update",res)
-          // io().emit("detach",this.GAMEID)
 
           // Create a function to refresh the page
           const refresh = () => {window.location.reload()}
@@ -1555,7 +1547,6 @@ private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
             
             // If the socket sent my data is false
             if (!socket.sentMydata) {
-              // socket.emit("stop_searching_for_players")
               // Send the request to stop asking for the users
               Observable.toSocketIO(socket,"stop_searching_for_players")
               // If sent then stop asking
@@ -1653,7 +1644,6 @@ static switchToSP = () => {
 
       // Send the request to detach
       Observable.toSocketIO(socket,"detach","check")
-      // io().emit("detach","check")
 
       // Creating a function to reload the page
       const refresh = () => {window.location.reload()}
@@ -1674,7 +1664,6 @@ createGame= () => {
 
     // Opbservable to create a new game
     Observable.toSocketIO(socket,"new_game")
-    // socket.emit('new_game');
 
     // Create an array with boolean values
     let allocated:Array<boolean> = []
@@ -1711,7 +1700,6 @@ joinGame = () => {
       const socket = io(),        // Reference to the io() function
           _this = this            // Reference to the Multiplayer Class
 
-      // socket.emit('join_game',);
       // Sending a request to join the game with the game id
       Observable.toSocketIO(socket,"join_game",game_id.toString())
       // Getting the data needed from the server to update the client
