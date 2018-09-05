@@ -215,7 +215,7 @@ class Ball {
         // Starting y accelaration for the ball using a random value between the gradients [0,-1,1] ( if the ball speed is 1)
         let y_change = Math.floor((Math.random() * 3))
         
-        // Defining functions to unsubscribe the observables
+        // Defining the varibales to hold the unsubscribe functions of the observables
         let normal:()=>void = ()=>null,                         // Unsubscribe for the normal ball movement
         bottomSide:()=>void = ()=>null,                         // Unsubscribe for the ball colliding with the bottom side
         topSide:()=>void = ()=>null,                            // Unsubscribe for the ball colliding with the top side
@@ -461,22 +461,18 @@ class CPUPaddleMovement{
     // since it is updating slower than the ball
     const paddle_increment = Settings.settings.ball_speed
 
-    // Defining the functions to unsubscribe the observables after asigning them
-    let moveUp:()=>void = ()=>null
-    let moveDown:()=>void = ()=>null
-    let stay:()=>void = ()=>null
+    // Defining the varibales to hold the unsubscribe functions of the observables
+    let moveUp:()=>void = ()=>null        // Unsubscribe for the paddle up movement
+    let moveDown:()=>void = ()=>null      // Unsubscribe for the paddle down movement
+    let stay:()=>void = ()=>null          // Unsubscribe for paddle to not move
 
     
             // Observable to update the AI Paddle, to move down if the ball location is below than the paddle center   
             moveDown = Observable.interval(Settings.settings.game_speed)
-                    .map(_=>(
-                      {x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
-                    
-                    .filter(
-                      ({x}) => Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 < Number(x))
+                    .map(_=>({x:SessionData.session_data.current_ball!.getBall().attr('cy') }))
+                    .filter(({x}) => Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 < Number(x))
                     .filter((_) => !(Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height")) > Settings.settings.table_height-Settings.settings.padding))
-                    .map(
-                      (_)=>( {y : Number(this.paddle!.attr("y")) + paddle_increment }) )
+                    .map((_)=>( {y : Number(this.paddle!.attr("y")) + paddle_increment }) )
                     .subscribe(({y})=>(
                       console.log("go down"),
                       this.paddle!.attr("y",y.toString())))
@@ -566,102 +562,22 @@ class Gameplay {
     const 
     mouseup = Observable.fromEvent<MouseEvent>(HTMLPage.svg, 'mouseup')
     // Check if the Multiplayer game is running
-    .filter(s=>!Multiplayer.MULTIPLAYER_STATUS)
+    .filter(_=>!Multiplayer.MULTIPLAYER_STATUS)
     // Check if the previous round has ended
-    .filter((s=>!this.game_data.round_started))
+    .filter((_=>!this.game_data.round_started))
     // If all the above conditions past then, start the round
-    .subscribe(s=>this.startRound())
+    .subscribe(_=>this.startRound())
 
-
-
-      
+    // Defining the varibales to hold the unsubscribe functions of the observables
     let scoreLeft:()=>void = ()=>null
     let scoreRight:()=>void = ()=>null
     let gameWin:()=>void = ()=>null
 
 
-
-    // // Creating an observable that fires every game (Userdefined framerate) milliseconds
-    // this.session_data.gameplay_main = Observable.interval(Settings.settings.game_speed)
-    // // Using the current ball reference stored in the class attribute, we get the x axis values for the ball
-    // .map(s=>({x:this.session_data.current_ball!.getBall().attr('cx')}))
-    // // Calling the subscribe function to check whether the ball is in bounds are if not calculating the points
-    // .subscribe(
-    //   ({x})=>{
-    //     // Checking if the x value of the ball is less than the left bound
-    //     if (Number(x) < (Number(HTMLPage.svg.getAttribute("x"))-Number(this.session_data.current_ball!.getBall().attr("r")))) {
-    //             // Play the sound for the ball going out of bounds 
-    //             GameSound.game_sound.fail.play()
-    //             // Increase the score of the right side player by one
-    //             this.game_data.score_right+=1
-    //             // Update the GUI score
-    //             document.getElementById("score2")!.textContent = (this.game_data.score_right).toString()
-    //             // End the ball movement observable
-    //             this.session_data.end_ball_movement()
-    //             // End the AI Paddle movement
-    //             this.session_data.end_cpu_paddle_movement()
-    //             // Generating the random value to be used as the starting position for the next round
-    //             this.session_data.current_ball!.getBall()
-    //               .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-    //               .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
-    //             // Setting the flag to start the next round as false
-    //             this.game_data.round_started = false
-    //             // Changing the direction of the ball so that it moves towards the left player
-    //             this.game_data.start_direction = -1
-    //             // Update the GUI Element to indicate which side is serving
-    //             this.htmlPage!.getGameBanner().textContent = "Right is Serving"
-
-    //     // Checking if the x value of the ball is greater than the right bound
-    //     }else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(this.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))){
-    //             // Play the sound for the ball going out of bounds 
-    //             GameSound.game_sound.fail.play()
-    //             // Increase the score of the left side player by one
-    //             this.game_data.score_left +=1
-    //             // Update the GUI score
-    //             document.getElementById("score1")!.textContent = (this.game_data.score_left).toString()
-    //             // End the ball movement observable
-    //             this.session_data.end_ball_movement()
-    //             // End the AI Paddle movement
-    //             this.session_data.end_cpu_paddle_movement()
-    //             // Generating the random value to be used as the starting position for the next round
-    //             this.session_data.current_ball!.getBall()
-    //               .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(this.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-    //               .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
-    //             // Setting the flag to start the next round as false
-    //             this.game_data.round_started = false
-    //             // Changing the direction of the ball so that it moves towards the right player
-    //             this.game_data.start_direction = 1
-    //             // Update the GUI Element to indicate which side is serving
-    //             this.htmlPage!.getGameBanner().textContent = "Left is Serving"
-    //   }
-    //   // Checking after increasing score whether any player has reached the game point
-    //   if (this.game_data.score_left >= Settings.settings.game_point || this.game_data.score_right >= Settings.settings.game_point){
-    //     // Calling the unsubscribe function for the main gameplay
-    //     this.session_data.gameplay_main()
-    //     // Ending the mouse up observable so that it wont start a new game
-    //     mouseup()
-    //     // Calling the unsubscribe function to end the ball movement
-    //     this.session_data.end_ball_movement()
-    //     // Calling the unsubscribe function to end the cpu paddle movement
-    //     this.session_data.end_cpu_paddle_movement()
-    //     // Setting the radius of the ball to 0 to hide the ball
-    //     this.session_data.current_ball!.getBall().attr("r",0)
-    //     // Updating the GUI to ask the user to play again
-    //     this.htmlPage!.getPlayerTurn().textContent = "Wanna play again?"
-    //     // Check which player won and update the GUI accordingly 
-    //     this.game_data.score_left>this.game_data.score_right?this.htmlPage!.getGameBanner().textContent = "Left Won the Game":this.htmlPage!.getGameBanner().textContent = "Right Won the Game"
-    //     // Update the GUI button to display paly again
-    //     document.getElementById("start")!.textContent = "Play Again"
-    //     // Set the flag to true to stop the game from starting
-    //     this.game_data.round_started = true
-    //   }
-      
-    //   })
-
      // Creating an observable that fires every game (Userdefined framerate) milliseconds
     scoreLeft = Observable.interval(Settings.settings.game_speed)
     // Using the current ball reference stored in the class attribute, we get the x axis values for the ball
-    .map(s=>({x:this.session_data.current_ball!.getBall().attr('cx')}))
+    .map(_=>({x:this.session_data.current_ball!.getBall().attr('cx')}))
     .filter(({x}) => (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(this.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))))
     // Calling the subscribe function to check whether the ball is in bounds are if not calculating the points
     .subscribe(
@@ -755,8 +671,8 @@ class Gameplay {
          )
        )
 
-
-        this.session_data.gameplay_main = () => (scoreLeft(),scoreRight(),gameWin())
+      // Setting the unsubscribe funtion to stop the score board
+      this.session_data.gameplay_main = () => (scoreLeft(),scoreRight(),gameWin())
 
 
   }
@@ -890,9 +806,6 @@ class HTMLPage {
     return res
   
   }
-
-
-
 
   /**
    * Function used to update the settings in the game
@@ -1080,8 +993,9 @@ class GameSound {
 // ******************************************************************************************************************************************************************************************************  //
 // ******************************************************************************************************************************************************************************************************  //
 // ******************************************************************************************************************************************************************************************************  //
-
-
+// ******************************************************************************************************************************************************************************************************  //
+// ******************************************************************************************************************************************************************************************************  //
+// ******************************************************************************************************************************************************************************************************  //
 
 
 
@@ -1337,136 +1251,20 @@ class Multiplayer {
           SessionData.game_data.round_started = true,
           // Start the ball movement
           SessionData.session_data.end_ball_movement= SessionData.session_data.current_ball!.ball_movement(SessionData.game_data.start_direction)))
-    
-    // // Creating an observable to notify every 10 milliseconds
-    // SessionData.session_data.gameplay_main = Observable.interval(10)
-    // // Get the current ball x axis
-    // .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
-    // // Subscribe to the observable to update the scores
-    // .subscribe(
-    //   ({x})=>{
-    //     // Checking if the x value of the ball is less than the left bound
-    //     if (Number(x) < (Number(HTMLPage.svg.getAttribute("x"))-Number(SessionData.session_data.current_ball!.getBall().attr("r")))) {
-    //             // Play the sound for the ball going out of bounds 
-    //             GameSound.game_sound.fail.play()
-    //             // Increase the score of the right side player by one
-    //             SessionData.game_data.score_right+=1
-    //             // Update the GUI score
-    //             document.getElementById("score2")!.textContent = (SessionData.game_data.score_right).toString()
-    //             // End the ball movement observable
-    //             SessionData.session_data.end_ball_movement()
-    //             // Setting the flag to start the next round as false
-    //             SessionData.game_data.round_started = false
-    //             // Changing the direction of the ball so that it moves towards the left player
-    //             SessionData.game_data.start_direction = -1
-    //             // Update the GUI Element to indicate which side is serving
-    //             this.html_page.getPlayerTurn().textContent = "Right is Serving"
-    //             // Generating the random value to be used as the starting position for the next round
-    //             SessionData.session_data.current_ball!.getBall()
-    //             .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-    //             .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
-    //             // Creating an object to be sent to the server with all the socre data
-    //             let res = {
-    //               "status" : 0,
-    //               "game_id" : this.GAMEID,
-    //               "score_1" : SessionData.game_data.score_left,
-    //               "score_2" : SessionData.game_data.score_right,
-    //               "message" : "Right is Serving"
-    //             }
-    //             // Sending the data to the server
-    //             Observable.toSocketIO(socket,"score_update",res)
-    //             // io().emit("score_update",res)
-  
-    //           // Checking if the x value of the ball is greater than the right bound
-    //           }else if (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(SessionData.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))){
-    //             // Play the sound for the ball going out of bounds 
-    //             GameSound.game_sound.fail.play()
-    //             // Increase the score of the left side player by one
-    //             SessionData.game_data.score_left +=1
-    //             // Update the GUI score
-    //             document.getElementById("score1")!.textContent = (SessionData.game_data.score_left).toString()
-    //             // End the ball movement observable
-    //             SessionData.session_data.end_ball_movement()
-    //             // Setting the flag to start the next round as false
-    //             SessionData.game_data.round_started = false
-    //             // Changing the direction of the ball so that it moves towards the right player
-    //             SessionData.game_data.start_direction = 1
-    //             // Update the GUI Element to indicate which side is serving
-    //             this.html_page.getPlayerTurn().textContent = "Left is Serving"
-    //             // Generating the random value to be used as the starting position for the next round
-    //             SessionData.session_data.current_ball!.getBall()
-    //             .attr("cy",Math.floor(Math.random() * (Number(HTMLPage.svg.getAttribute("height")) - Settings.settings.padding - Number(SessionData.session_data.current_ball!.getBall().attr("r")) - Settings.settings.padding - 1) + Settings.settings.padding))
-    //             .attr("cx",Number(HTMLPage.svg.getAttribute("width"))/2)
-    //             // Creating an object to be sent to the server with all the score data
-    //             let res = {
-    //               "status" : 0,
-    //               "game_id" : this.GAMEID,
-    //               "score_1" : SessionData.game_data.score_left,
-    //               "score_2" : SessionData.game_data.score_right,
-    //               "message" : "Left is Serving"
-    //             }
-    //             // Sending the data to the server
-    //             Observable.toSocketIO(socket,"score_update",res)
-    //             // io().emit("score_update",res)
-    //   }
-    //   // Checking after increasing score whether any player has reached the game point
-    //   if (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point){
-    //           // Hiding the single player button
-    //           document.getElementById("singleplayer_button")!.style.display = "none"
-    //           // Showing the loader until the host sends the data to the server
-    //           document.getElementById("loader2")!.style.display = "block"
-    //           // Ending the mouse up observable so that it wont start a new game
-    //           SessionData.session_data.gameplay_main()
-    //           // Ending the mouse up observable
-    //           mouseup()
-    //           // Calling the unsubscribe function to end the ball movement
-    //           SessionData.session_data.end_ball_movement()
-    //            // Setting the radius of the ball to 0 to hide the ball
-    //           SessionData.session_data.current_ball!.getBall().attr("r",0)
-    //           // Updating the GUI to prompt the user to wait
-    //           this.html_page.getPlayerTurn().textContent = "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
-    //           // Check which player won and update the GUI accordingly 
-    //           SessionData.game_data.score_left>SessionData.game_data.score_right?this.html_page.getGameBanner().textContent = "Left Won the Game":this.html_page.getGameBanner().textContent = "Right Won the Game"
-    //           // Set the flag to true to stop the game from starting
-    //           SessionData.game_data.round_started = true
-    //           // Creating an object to be sent to the server with all the score data  
-    //           let res = {
-    //             "status" : 1,
-    //             "game_id" : this.GAMEID,
-    //             "score_1" : SessionData.game_data.score_left,
-    //             "score_2" : SessionData.game_data.score_right,
-    //             "message" : "Thank You for Playing Multiplayer Pong. You will be redirected to single player is 5 seconds."
-    //           }
 
-    //           // Sending the data to the server
-    //           Observable.toSocketIO(socket,"score_update",res)
-
-    //           // Sending the detach signal to the server
-    //           Observable.toSocketIO(socket,"detach",this.GAMEID)
-
-    //           // io().emit("score_update",res)
-    //           // io().emit("detach",this.GAMEID)
-
-    //           // Create a function to refresh the page
-    //           const refresh = () => {window.location.reload()}
-    //            // Waiting 5 seconds and then refreshing the page
-    //           setTimeout(refresh,5000)
-
-    //   }
-    // })
-
-    let scoreLeft:()=>void = ()=>null
-    let scoreRight:()=>void = ()=>null
-    let gameWin:()=>void = ()=>null
+    // Defining the varibales to hold the unsubscribe functions of the observables
+    let scoreLeft:()=>void = ()=>null       // Unsubscribe for the left score
+    let scoreRight:()=>void = ()=>null      // Unsubscribe for the right score
+    let gameWin:()=>void = ()=>null         // Unsubscribe for when the game ends
 
      // Creating an observable that fires every game (Userdefined framerate) milliseconds
      scoreLeft = Observable.interval(Settings.settings.game_speed)
      // Using the current ball reference stored in the class attribute, we get the x axis values for the ball
-     .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
+     .map(_=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
      .filter(({x}) => (Number(x) < (Number(HTMLPage.svg.getAttribute("x"))-Number(SessionData.session_data.current_ball!.getBall().attr("r")))))
      // Calling the subscribe function to check whether the ball is in bounds are if not calculating the points
      .subscribe(
-       ({x})=>
+       (_)=>
          ((
                 // Play the sound for the ball going out of bounds 
                 GameSound.game_sound.fail.play(),
@@ -1503,11 +1301,11 @@ class Multiplayer {
       // Creating an observable that fires every game (Userdefined framerate) milliseconds
       scoreRight = Observable.interval(Settings.settings.game_speed)
       // Using the current ball reference stored in the class attribute, we get the x axis values for the ball
-      .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
+      .map(_=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
       .filter(({x}) => (Number(x) > (Number(HTMLPage.svg.getAttribute("x"))+Number(SessionData.session_data.current_ball!.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width") ))))
       // Calling the subscribe function to check whether the ball is in bounds are if not calculating the points
       .subscribe(
-        ({x})=>
+        (_)=>
           (
                   // Play the sound for the ball going out of bounds 
                 GameSound.game_sound.fail.play(),
@@ -1536,7 +1334,6 @@ class Multiplayer {
                   "score_2" : SessionData.game_data.score_right,
                   "message" : "Left is Serving"
                 })
-                // io().emit("score_update",res)
   
           )
         )
@@ -1544,11 +1341,11 @@ class Multiplayer {
        // Creating an observable that fires every game (Userdefined framerate) milliseconds
       gameWin = Observable.interval(Settings.settings.game_speed)
       // Using the current ball reference stored in the class attribute, we get the x axis values for the ball
-      .map(s=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
-      .filter(({x}) => (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point))
+      .map(_=>({x:SessionData.session_data.current_ball!.getBall().attr('cx')}))
+      .filter((_) => (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point))
       // Calling the subscribe function to check whether the ball is in bounds are if not calculating the points
       .subscribe(
-        ({x})=>
+        (_)=>
           (
               // Hiding the single player button
               document.getElementById("singleplayer_button")!.style.display = "none",
@@ -1591,8 +1388,8 @@ class Multiplayer {
           )
         )
  
- 
-         SessionData.session_data.gameplay_main = () => (scoreLeft(),scoreRight(),gameWin())
+        // Unsubscribe function to stop the scoring of the game
+        SessionData.session_data.gameplay_main = () => (scoreLeft(),scoreRight(),gameWin())
 
 
   }

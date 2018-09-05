@@ -262,14 +262,14 @@ function pong() {
             };
             this.gameplay = () => {
                 const mouseup = Observable.fromEvent(HTMLPage.svg, 'mouseup')
-                    .filter(s => !Multiplayer.MULTIPLAYER_STATUS)
-                    .filter((s => !this.game_data.round_started))
-                    .subscribe(s => this.startRound());
+                    .filter(_ => !Multiplayer.MULTIPLAYER_STATUS)
+                    .filter((_ => !this.game_data.round_started))
+                    .subscribe(_ => this.startRound());
                 let scoreLeft = () => null;
                 let scoreRight = () => null;
                 let gameWin = () => null;
                 scoreLeft = Observable.interval(Settings.settings.game_speed)
-                    .map(s => ({ x: this.session_data.current_ball.getBall().attr('cx') }))
+                    .map(_ => ({ x: this.session_data.current_ball.getBall().attr('cx') }))
                     .filter(({ x }) => (Number(x) > (Number(HTMLPage.svg.getAttribute("x")) + Number(this.session_data.current_ball.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width")))))
                     .subscribe(({ x }) => (GameSound.game_sound.fail.play(),
                     this.game_data.score_left += 1,
@@ -507,9 +507,9 @@ function pong() {
                 let scoreRight = () => null;
                 let gameWin = () => null;
                 scoreLeft = Observable.interval(Settings.settings.game_speed)
-                    .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
+                    .map(_ => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
                     .filter(({ x }) => (Number(x) < (Number(HTMLPage.svg.getAttribute("x")) - Number(SessionData.session_data.current_ball.getBall().attr("r")))))
-                    .subscribe(({ x }) => ((GameSound.game_sound.fail.play(),
+                    .subscribe((_) => ((GameSound.game_sound.fail.play(),
                     SessionData.game_data.score_right += 1,
                     document.getElementById("score2").textContent = (SessionData.game_data.score_right).toString(),
                     SessionData.session_data.end_ball_movement(),
@@ -527,9 +527,9 @@ function pong() {
                         "message": "Right is Serving"
                     }))));
                 scoreRight = Observable.interval(Settings.settings.game_speed)
-                    .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
+                    .map(_ => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
                     .filter(({ x }) => (Number(x) > (Number(HTMLPage.svg.getAttribute("x")) + Number(SessionData.session_data.current_ball.getBall().attr("r")) + Number(HTMLPage.svg.getAttribute("width")))))
-                    .subscribe(({ x }) => (GameSound.game_sound.fail.play(),
+                    .subscribe((_) => (GameSound.game_sound.fail.play(),
                     SessionData.game_data.score_left += 1,
                     document.getElementById("score1").textContent = (SessionData.game_data.score_left).toString(),
                     SessionData.session_data.end_ball_movement(),
@@ -547,9 +547,9 @@ function pong() {
                         "message": "Left is Serving"
                     })));
                 gameWin = Observable.interval(Settings.settings.game_speed)
-                    .map(s => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
-                    .filter(({ x }) => (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point))
-                    .subscribe(({ x }) => (document.getElementById("singleplayer_button").style.display = "none",
+                    .map(_ => ({ x: SessionData.session_data.current_ball.getBall().attr('cx') }))
+                    .filter((_) => (SessionData.game_data.score_left >= Settings.settings.game_point || SessionData.game_data.score_right >= Settings.settings.game_point))
+                    .subscribe((_) => (document.getElementById("singleplayer_button").style.display = "none",
                     document.getElementById("loader2").style.display = "block",
                     SessionData.session_data.gameplay_main(),
                     mouseup(),
