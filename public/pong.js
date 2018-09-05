@@ -154,7 +154,7 @@ function pong() {
                     .filter(({ x, y }) => (Number(y) >= Number(SessionData.session_data.current_paddle.attr("y")) + Number(SessionData.session_data.current_paddle.attr("height")) - Number(SessionData.session_data.current_paddle.attr("height")) * 0.05))
                     .map((_) => (GameSound.game_sound.collision.play(),
                     x_change = (-x_change * gradients[4]),
-                    y_change = gradients[3]))
+                    y_change = gradients[4]))
                     .subscribe((_) => (this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change),
                     this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)));
                 opponentPaddleTop = observableFromBallAfterCollisionOpponentPaddle
@@ -192,7 +192,7 @@ function pong() {
                     .filter(({ x, y }) => (Number(y) >= Number(SessionData.session_data.opponent_paddle.attr("y")) + Number(SessionData.session_data.opponent_paddle.attr("height")) - Number(SessionData.session_data.opponent_paddle.attr("height")) * 0.05))
                     .map((_) => (GameSound.game_sound.collision.play(),
                     x_change = (-x_change * gradients[4]),
-                    y_change = gradients[3]))
+                    y_change = gradients[4]))
                     .subscribe((_) => (this.ball.attr('cx', Number(this.ball.attr('cx')) + x_change),
                     this.ball.attr('cy', Number(this.ball.attr('cy')) + y_change)));
                 return () => (normal(),

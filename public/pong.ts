@@ -357,7 +357,7 @@ class Ball {
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change*gradients[4]),
-            y_change = gradients[3]
+            y_change = gradients[4]
           ))
           // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
@@ -437,7 +437,7 @@ class Ball {
           .map((_) => (
             GameSound.game_sound.collision.play(),
             x_change = (-x_change*gradients[4]),
-            y_change = gradients[3]
+            y_change = gradients[4]
           ))
           // .map((_)=>({x:x_change+Number(x) ,y:y_change+Number(y) }))
           .subscribe((_)=>(
