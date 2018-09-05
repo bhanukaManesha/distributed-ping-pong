@@ -695,10 +695,11 @@ function pong() {
                             tr.appendChild(td_2);
                             table.appendChild(tr);
                             let count = 0;
-                            for (const [key, value] of Object.entries(res.game_data)) {
-                                if (this.USERS[0] != key)
-                                    this.USERS.push(key);
-                            }
+                            let _this = this;
+                            Object.keys(res.game_data).forEach(function (key) {
+                                if (_this.USERS[0] != key)
+                                    _this.USERS.push(key);
+                            });
                             for (let i = 0; i <= 1; i++) {
                                 let tr = document.createElement("tr"), td_0 = document.createElement("td"), td_1 = document.createElement("td"), td_2 = document.createElement("td"), text_1 = undefined, tick = undefined, side = document.createTextNode((count === 0) ? "Left Side" : "Right Side");
                                 if (this.USERS[i] !== undefined) {

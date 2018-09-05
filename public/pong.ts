@@ -1,6 +1,7 @@
 // FIT2102 2018 Assignment 1
 // https://docs.google.com/document/d/1woMAgJVf1oL3M49Q8N3E1ykTuTu5_r28_MQPVS5QIVo/edit?usp=sharing
 
+
 function pong() {
   // Inside this function you will use the classes and functions 
   // defined in svgelement.ts and observable.ts
@@ -1469,13 +1470,16 @@ private updateLobbyTable(res:any,socket:any,trying_count:Array<number>) {
             // Initialize a count varible to 0
             let count = 0;
       
+            // Getting a refrence to the class
+            let _this = this
+
             // Using a for loop push the user data onto the USERS array
-            for (const [key, value] of Object.entries(res.game_data)) {
+            Object.keys(res.game_data).forEach(function(key) {
               // If the users key is not the same as the host key
-              if (this.USERS[0] != key)
+              if (_this.USERS[0] != key)
                   // Push the key to the users table 
-                  this.USERS.push(key)
-            }
+                  _this.USERS.push(key)
+            });
             // Using a loop that runs twice, create the users table row elements
             for (let i = 0; i <= 1; i++) {
                 // Create a new table row element
@@ -1726,6 +1730,7 @@ main()
 
 }
 
+declare let io: any
 // the following simply runs your pong function on window load.  Make sure to leave it in place.
 if (typeof window != 'undefined')
   window.onload = ()=>{
