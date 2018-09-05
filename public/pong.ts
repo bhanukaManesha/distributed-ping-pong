@@ -60,7 +60,7 @@ class Settings {
   static settings = {
     "table_height":600,                             // Initializing the table height as 600px
     "table_width":600,                              // Initializing the table width as 600px
-    "game_speed" : 1,                               // Initializing the game speed as 1, this is the rate in which all of the Observable.intervals will fire data 
+    "game_speed" : 10,                               // Initializing the game speed as 1, this is the rate in which all of the Observable.intervals will fire data 
     "ball_speed" : 2,                               // Initializing the ball_speed as 2, this is number of pixels the ball changes every game_speed milliseconds
     "player_side" : "left",                         // Initializing the player_side as left, so that by defalut the user will be initlized to the left
     "game_point":11,                                // Initializing the game point as 11, this is the point at which the game ends
@@ -1365,6 +1365,8 @@ class Multiplayer {
 
     // Check whether the GameID is the current Session Game ID
     if (res.game_id == this.GAMEID) {
+      // Play the sound for the ball going out of bounds 
+      GameSound.game_sound.fail.play(),
       // Upadting the client left score
       SessionData.game_data.score_left = res.score_1
       // Updating the client right score
@@ -1550,7 +1552,7 @@ class Multiplayer {
      .subscribe(
        ({x})=>
          ((
-                  // Play the sound for the ball going out of bounds 
+                // Play the sound for the ball going out of bounds 
                 GameSound.game_sound.fail.play(),
                 // Increase the score of the right side player by one
                 SessionData.game_data.score_right+=1,

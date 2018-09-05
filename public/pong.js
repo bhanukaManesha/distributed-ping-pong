@@ -22,7 +22,7 @@ function pong() {
     Settings.settings = {
         "table_height": 600,
         "table_width": 600,
-        "game_speed": 1,
+        "game_speed": 10,
         "ball_speed": 2,
         "player_side": "left",
         "game_point": 11,
@@ -477,7 +477,8 @@ function pong() {
             this.updateScore = (res) => {
                 const socket = io();
                 if (res.game_id == this.GAMEID) {
-                    SessionData.game_data.score_left = res.score_1;
+                    GameSound.game_sound.fail.play(),
+                        SessionData.game_data.score_left = res.score_1;
                     SessionData.game_data.score_right = res.score_2;
                     this.html_page.getPlayerTurn().textContent = res.message;
                     document.getElementById("score1").textContent = (SessionData.game_data.score_left).toString();
