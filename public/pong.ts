@@ -471,7 +471,6 @@ class CPUPaddleMovement{
                     .filter((_) => !(Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height")) > Settings.settings.table_height-Settings.settings.padding))
                     .map((_)=>( {y : Number(this.paddle!.attr("y")) + paddle_increment }) )
                     .subscribe(({y})=>(
-                      console.log("go down"),
                       this.paddle!.attr("y",y.toString())))
                   
             // Observable to update the AI Paddle, to move up if the ball location is above than the paddle center   
@@ -481,7 +480,6 @@ class CPUPaddleMovement{
                     .filter((_) => !(Number(this.paddle!.attr("y")) < Settings.settings.padding))
                     .map((_)=>( {y : Number(this.paddle!.attr("y")) - paddle_increment }))
                     .subscribe(({y})=>(
-                      console.log("go up"),
                       this.paddle!.attr("y",y.toString())))
                   
             // Observable to update the AI Paddle, to move up if the ball location is the same as the paddle center  
@@ -490,7 +488,6 @@ class CPUPaddleMovement{
                     .filter(({x}) => Number(this.paddle!.attr("y")) + Number(this.paddle!.attr("height"))/2 === Number(x))
                     .map((_)=>( {y : Number(this.paddle!.attr("y"))}))
                     .subscribe(({y})=>(
-                      console.log("eq"),
                       this.paddle!.attr("y",y.toString())))
                   
           // Returning a function with all the unsubscribe function to stop the paddle movement

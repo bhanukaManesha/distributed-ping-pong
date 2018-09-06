@@ -92,16 +92,16 @@ function pong() {
                 let y_change = Math.floor((Math.random() * 3));
                 let normal = () => null, bottomSide = () => null, topSide = () => null, currentPaddleTop = () => null, currentPaddleTopMiddle = () => null, currentPaddleMiddle = () => null, currentPaddleBottomMiddle = () => null, currentPaddleBottom = () => null, opponentPaddleTop = () => null, opponentPaddleTopMiddle = () => null, opponentPaddleMiddle = () => null, opponentPaddleBottomMiddle = () => null, opponentPaddleBottom = () => null;
                 const observableFromBall = Observable.interval(Settings.settings.game_speed).map(s => ({ x: this.ball.attr('cx'), y: this.ball.attr('cy') }));
-                const observableFromBallAfterCollisionCurrentPaddle = Observable.interval(Settings.settings.game_speed).map(s => ({ x: this.ball.attr('cx'), y: this.ball.attr('cy') }))
-                    .filter(({ x, y }) => Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.current_paddle.attr("x")) + Number(SessionData.session_data.current_paddle.attr("width"))
-                    && Number(x) + Number(this.ball.attr("r")) > Number(SessionData.session_data.current_paddle.attr("x")) - Number(SessionData.session_data.current_paddle.attr("width"))
-                    && Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.current_paddle.attr("y"))
-                    && Number(y) < Number(SessionData.session_data.current_paddle.attr("y")) + Number(SessionData.session_data.current_paddle.attr("height")) + Number(this.ball.attr("r")));
+                const observableFromBallAfterCollisionCurrentPaddle = Observable.interval(Settings.settings.game_speed).map(_ => ({ x: this.ball.attr('cx'), y: this.ball.attr('cy') }))
+                    .filter(({ x, y }) => Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.current_paddle.attr("x")) + Number(SessionData.session_data.current_paddle.attr("width")))
+                    .filter(({ x, y }) => Number(x) + Number(this.ball.attr("r")) > Number(SessionData.session_data.current_paddle.attr("x")) - Number(SessionData.session_data.current_paddle.attr("width")))
+                    .filter(({ x, y }) => Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.current_paddle.attr("y")))
+                    .filter(({ x, y }) => Number(y) < Number(SessionData.session_data.current_paddle.attr("y")) + Number(SessionData.session_data.current_paddle.attr("height")) + Number(this.ball.attr("r")));
                 const observableFromBallAfterCollisionOpponentPaddle = Observable.interval(Settings.settings.game_speed).map(s => ({ x: this.ball.attr('cx'), y: this.ball.attr('cy') }))
-                    .filter(({ x, y }) => Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.opponent_paddle.attr("x")) + Number(SessionData.session_data.opponent_paddle.attr("width"))
-                    && Number(x) + Number(this.ball.attr("r")) > Number(SessionData.session_data.opponent_paddle.attr("x")) - Number(SessionData.session_data.opponent_paddle.attr("width"))
-                    && Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.opponent_paddle.attr("y"))
-                    && Number(y) < Number(SessionData.session_data.opponent_paddle.attr("y")) + Number(SessionData.session_data.opponent_paddle.attr("height")) + Number(this.ball.attr("r")));
+                    .filter(({ x, y }) => Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.opponent_paddle.attr("x")) + Number(SessionData.session_data.opponent_paddle.attr("width")))
+                    .filter(({ x, y }) => Number(x) + Number(this.ball.attr("r")) > Number(SessionData.session_data.opponent_paddle.attr("x")) - Number(SessionData.session_data.opponent_paddle.attr("width")))
+                    .filter(({ x, y }) => Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.opponent_paddle.attr("y")))
+                    .filter(({ x, y }) => Number(y) < Number(SessionData.session_data.opponent_paddle.attr("y")) + Number(SessionData.session_data.opponent_paddle.attr("height")) + Number(this.ball.attr("r")));
                 normal = Observable.interval(Settings.settings.game_speed)
                     .map(s => ({ x: this.ball.attr('cx'), y: this.ball.attr('cy') }))
                     .map(({ x, y }) => ({ x: x_change + Number(x), y: y_change + Number(y) }))
@@ -232,21 +232,18 @@ function pong() {
                     .filter(({ x }) => Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) / 2 < Number(x))
                     .filter((_) => !(Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) > Settings.settings.table_height - Settings.settings.padding))
                     .map((_) => ({ y: Number(this.paddle.attr("y")) + paddle_increment }))
-                    .subscribe(({ y }) => (console.log("go down"),
-                    this.paddle.attr("y", y.toString())));
+                    .subscribe(({ y }) => (this.paddle.attr("y", y.toString())));
                 moveUp = Observable.interval(Settings.settings.game_speed)
                     .map(_ => ({ x: SessionData.session_data.current_ball.getBall().attr('cy') }))
                     .filter(({ x }) => Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) / 2 > Number(x))
                     .filter((_) => !(Number(this.paddle.attr("y")) < Settings.settings.padding))
                     .map((_) => ({ y: Number(this.paddle.attr("y")) - paddle_increment }))
-                    .subscribe(({ y }) => (console.log("go up"),
-                    this.paddle.attr("y", y.toString())));
+                    .subscribe(({ y }) => (this.paddle.attr("y", y.toString())));
                 stay = Observable.interval(Settings.settings.game_speed)
                     .map(_ => ({ x: SessionData.session_data.current_ball.getBall().attr('cy') }))
                     .filter(({ x }) => Number(this.paddle.attr("y")) + Number(this.paddle.attr("height")) / 2 === Number(x))
                     .map((_) => ({ y: Number(this.paddle.attr("y")) }))
-                    .subscribe(({ y }) => (console.log("eq"),
-                    this.paddle.attr("y", y.toString())));
+                    .subscribe(({ y }) => (this.paddle.attr("y", y.toString())));
                 return () => (moveUp(), moveDown(), stay());
             };
             this.paddle = paddle;
