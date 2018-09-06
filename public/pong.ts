@@ -235,22 +235,18 @@ class Ball {
         const observableFromBall = Observable.interval(Settings.settings.game_speed).map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
 
         // Getting a reference to an Observable which maps the cx and cy values of the ball which filters the values that collide with the user paddle
-        const observableFromBallAfterCollisionCurrentPaddle = Observable.interval(Settings.settings.game_speed).map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
-              .filter(({x,y}) => 
-                    Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.current_paddle!.attr("x"))+ Number(SessionData.session_data.current_paddle!.attr("width"))
-                    && Number(x) + Number(this.ball.attr("r")) >Number(SessionData.session_data.current_paddle!.attr("x"))-Number(SessionData.session_data.current_paddle!.attr("width"))
-                    && Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.current_paddle!.attr("y")) 
-                    && Number(y) < Number(SessionData.session_data.current_paddle!.attr("y"))+Number(SessionData.session_data.current_paddle!.attr("height")) + Number(this.ball.attr("r"))
-                    )
+        const observableFromBallAfterCollisionCurrentPaddle = Observable.interval(Settings.settings.game_speed).map(_=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
+              .filter(({x,y}) => Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.current_paddle!.attr("x"))+ Number(SessionData.session_data.current_paddle!.attr("width")))
+              .filter(({x,y}) => Number(x) + Number(this.ball.attr("r")) >Number(SessionData.session_data.current_paddle!.attr("x"))-Number(SessionData.session_data.current_paddle!.attr("width")))
+              .filter(({x,y}) => Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.current_paddle!.attr("y")) )
+              .filter(({x,y}) => Number(y) < Number(SessionData.session_data.current_paddle!.attr("y"))+Number(SessionData.session_data.current_paddle!.attr("height")) + Number(this.ball.attr("r")))
         // Getting a reference to an Observable which maps the cx and cy values of the ball which filters the values that collide with the opponent paddle
         const observableFromBallAfterCollisionOpponentPaddle = Observable.interval(Settings.settings.game_speed).map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
-              .filter(({x,y}) => 
-                    Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.opponent_paddle!.attr("x"))+ Number(SessionData.session_data.opponent_paddle!.attr("width"))
-                    && Number(x) + Number(this.ball.attr("r")) >Number(SessionData.session_data.opponent_paddle!.attr("x"))-Number(SessionData.session_data.opponent_paddle!.attr("width"))
-                    && Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.opponent_paddle!.attr("y")) 
-                    && Number(y) < Number(SessionData.session_data.opponent_paddle!.attr("y"))+Number(SessionData.session_data.opponent_paddle!.attr("height")) + Number(this.ball.attr("r"))
-                    )
-
+              .filter(({x,y}) => Number(x) - Number(this.ball.attr("r")) < Number(SessionData.session_data.opponent_paddle!.attr("x"))+ Number(SessionData.session_data.opponent_paddle!.attr("width")))
+              .filter(({x,y}) => Number(x) + Number(this.ball.attr("r")) >Number(SessionData.session_data.opponent_paddle!.attr("x"))-Number(SessionData.session_data.opponent_paddle!.attr("width")))
+              .filter(({x,y}) => Number(y) + Number(this.ball.attr("r")) > Number(SessionData.session_data.opponent_paddle!.attr("y")) )
+              .filter(({x,y}) => Number(y) < Number(SessionData.session_data.opponent_paddle!.attr("y"))+Number(SessionData.session_data.opponent_paddle!.attr("height")) + Number(this.ball.attr("r")))
+        
           // Increasing the ball increment to move the ball
           normal = Observable.interval(Settings.settings.game_speed)
               .map(s=>({x:this.ball.attr('cx'),y:this.ball.attr('cy') }))
@@ -1730,6 +1726,7 @@ main()
 
 }
 
+// Declaring io since socket io is a external libarary
 declare let io: any
 // the following simply runs your pong function on window load.  Make sure to leave it in place.
 if (typeof window != 'undefined')
