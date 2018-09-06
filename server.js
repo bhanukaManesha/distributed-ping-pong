@@ -44,7 +44,6 @@ io.on('connection', function(socket) {
    * Function to intialize a new game i.e Create a new lobby
    */
   socket.on('new_game', function() {
-
     // Setting the variables
     max_number_of_players = 20
     gameid = Math.floor(Math.random() * max_number_of_players)
